@@ -1,0 +1,68 @@
+:root {
+  --font-size-h1: 2.5rem;
+  --font-size-h2: 2rem;
+  --font-size-h3: 1.75rem;
+  --font-size-h4: 1.5rem;
+  --font-size-h5: 1.25rem;
+  --font-size-h6: 1rem;
+
+  --color-primary: #333;
+  --color-secondary: #666;
+  --color-tertiary: #999;
+  --color-white: #fff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  font: 16px/1.5 'Roboto', sans-serif;
+  color: var(--color-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font: 400 'Roboto', sans-serif;
+  line-height: 1.2;
+  margin: 0 0 1rem 0;
+  font-size: var(--font-size-h1);
+}
+
+p { margin: 0 0 1rem 0; }
+
+a {
+  text-decoration: none;
+  color: var(--color-primary);
+}
+
+ul { list-style: none; }
+
+img { max-width: 100%; }
+
+#app{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+}
+canvas {
+  position: relative;
+  display: block;
+}
+#position{
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
