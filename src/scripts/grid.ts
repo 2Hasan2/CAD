@@ -1,3 +1,6 @@
+import { Line, Circle, Shape } from './interfaces/Shapes';
+import generateDXF from './functions/ToDXF';
+
 class CADGrid {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
@@ -8,17 +11,18 @@ class CADGrid {
     private panX: number;
     private panY: number;
     private scale: number;
+    private shapes: Shape[] = [];
 
     constructor(canvasId: string) {
         this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
         this.ctx = this.canvas.getContext('2d')!;
-        this.zoomLevel = 1;
+        this.zoomLevel = 3.5;
         this.panStartX = 0;
         this.panStartY = 0;
         this.isPanning = false;
         this.panX = this.canvas.width / 2;
         this.panY = this.canvas.height / 2;
-        this.scale = 25;
+        this.scale = 5;
 
         // Initialize canvas
         this.setCanvasSize();
@@ -46,31 +50,26 @@ class CADGrid {
         });
     }
 
-    // handle mouse down for start drawing a line or handle pan
     private handleMouseDown(event: MouseEvent) {
-            this.handlePanStart(event);
+        this.handlePanStart(event);
     }
-
 
     private handleZoom(event: WheelEvent) {
-            event.preventDefault();
-            const zoomIntensity = 0.01;
-            const wheel = event.deltaY < 0 ? 1 : -1;
-            const zoom = Math.exp(wheel * zoomIntensity);
+        event.preventDefault();
+        const zoomIntensity = 0.02;
+        const wheel = event.deltaY < 0 ? 1 : -1;
+        const zoom = Math.exp(wheel * zoomIntensity);
 
-            // Limit the zoom level between 0.01 and 100
-            this.zoomLevel = Math.max(0.01, Math.min(15, this.zoomLevel * zoom));
+        this.zoomLevel = Math.max(3, Math.min(1000, this.zoomLevel * zoom));
 
-            this.drawGrid();
+        this.drawGrid();
     }
 
-    // set canvas width and height
     private setCanvasSize() {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         this.panX = this.canvas.width / 2;
         this.panY = this.canvas.height / 2;
-
 
         this.drawGrid();
     }
@@ -82,7 +81,6 @@ class CADGrid {
     }
 
     private handlePanMove(event: MouseEvent) {
-        // show the mouse coordinates
         this.showCoordinates(event);
         if (this.isPanning) {
             const deltaX = event.clientX - this.panStartX;
@@ -102,64 +100,60 @@ class CADGrid {
         this.isPanning = false;
     }
 
-    private drawGrid() {
-        // center the grid
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Set the transform to apply zoom and pan
-        this.ctx.setTransform(this.zoomLevel, 0, 0, this.zoomLevel, this.panX, this.panY);
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // style of the grid
-        this.ctx.lineWidth = 2 / this.zoomLevel;
-        this.ctx.strokeStyle = '#000';
-
-        this.scale = Math.pow(2, Math.round(Math.log2(50 / this.zoomLevel)));
-
-
-
-        const numLinesX = Math.pow(3, Math.round(Math.log2(10000 / this.scale )));
-        const numLinesY = Math.pow(3, Math.round(Math.log2(10000 / this.scale)));
-
-
-        const startX = -numLinesX * this.scale;
-        const startY = -numLinesY * this.scale;
-
-        // Draw grid lines
+    private drawGridLines(start: number, end: number, isVertical: boolean) {
         this.ctx.beginPath();
-        for (let x = startX; x <= -startX; x += this.scale) {
-            this.ctx.moveTo(x, startY);
-            this.ctx.lineTo(x, -startY);
-        }
-        for (let y = startY; y <= -startY; y += this.scale) {
-            this.ctx.moveTo(startX, y);
-            this.ctx.lineTo(-startX, y);
+        for (let pos = start; pos <= -start; pos += this.scale) {
+            isVertical ? this.ctx.moveTo(pos, start) : this.ctx.moveTo(start, pos);
+            isVertical ? this.ctx.lineTo(pos, -start) : this.ctx.lineTo(-start, pos);
         }
         this.ctx.strokeStyle = '#ccc';
         this.ctx.stroke();
+    }
 
-        // Draw center point
+    private drawGrid() {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.ctx.setTransform(this.zoomLevel, 0, 0, this.zoomLevel, this.panX, this.panY);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.ctx.lineWidth = 1 / this.zoomLevel;
+        this.ctx.strokeStyle = '#000';
+
+        this.drawGridLines(-this.canvas.width * this.scale, this.canvas.width * this.scale, true);
+        this.drawGridLines(-this.canvas.height * this.scale, this.canvas.height * this.scale, false);
+
         this.ctx.fillStyle = 'red';
         this.ctx.beginPath();
         this.ctx.arc(0, 0, 3 / this.zoomLevel, 0, 2 * Math.PI);
         this.ctx.fill();
+
+        this.drawShapes();
     }
+
+    private drawShapes() {
+        let line = new Line(0, 0, 100.2, 0, 'red');
+        line.draw(this.ctx);
+        let line2 = new Line(0, 0, 100, 0, 'green');
+        line2.draw(this.ctx);
+        let circle = new Circle(0, 0, 55, 'blue');
+        circle.draw(this.ctx);
+
+        // this.shapes.push(line, line2, circle);
+        // console.log(this.shapes);
+    }
+
     private showCoordinates(event: MouseEvent) {
-        // show the mouse coordinates on the grid... it not event.clientX or event.clientY
         const x = Math.round((event.clientX - this.panX) / this.zoomLevel);
         const y = Math.round((event.clientY - this.panY) / this.zoomLevel);
         const coordinates = `(${x}, ${y})`;
-        // show in dom
         document.getElementById('position')!.innerHTML = coordinates;
     }
 
-    // move to the center of the grid
     private moveToCenter() {
         this.panX = this.canvas.width / 2;
         this.panY = this.canvas.height / 2;
-        this.zoomLevel = 1;
+        this.zoomLevel = 3.5;
         this.drawGrid();
     }
 }
