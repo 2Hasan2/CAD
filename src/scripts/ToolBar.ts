@@ -39,7 +39,7 @@ class ToolsBar{
                     id:"circle",
                     icon:"circle",
                     action: () => {
-                        console.log('circle');
+                        cadGrid.setCurrShape('circle');
                     }
                 },
                 {

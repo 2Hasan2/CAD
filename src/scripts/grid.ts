@@ -111,6 +111,10 @@ class CADGrid {
                 let line = new Line(this.startPoint[0],this.startPoint[1],this.panStartX, this.panStartY, 'red');
                 this.drawShape(line);
                 this.Draw = line;
+            }else if (this.currShape === 'circle') {
+                let circle = new Circle(this.startPoint[0],this.startPoint[1],Math.sqrt(Math.pow(this.panStartX - this.startPoint[0], 2) + Math.pow(this.panStartY - this.startPoint[1], 2)), 'blue');
+                this.drawShape(circle);
+                this.Draw = circle;
             }
         }
     }
@@ -131,6 +135,9 @@ class CADGrid {
         // save shape
         if (!this.Draw) return;
         if (this.currShape === 'line') {
+            this.shapes.push(this.Draw);
+            this.Draw = null;
+        } else if (this.currShape === 'circle') {
             this.shapes.push(this.Draw);
             this.Draw = null;
         }
