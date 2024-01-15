@@ -7,6 +7,7 @@ class CADGrid {
     private panStartX: number;
     private panStartY: number;
     private startPoint: [number, number];
+    private startAngle: number=0;
     private IsStartPointSet: boolean = true;
     private isPanning: boolean;
     private panX: number;
@@ -101,6 +102,7 @@ class CADGrid {
         else if (this.isPanning && !this.moveHand) {
             if (this.IsStartPointSet) {
                 this.startPoint = [Math.round((event.clientX - this.panX) / this.zoomLevel), Math.round((event.clientY - this.panY) / this.zoomLevel)];
+                this.startAngle = Math.atan2(this.startPoint[1], this.startPoint[0]);
                 this.IsStartPointSet = false;
             }
             this.panStartX = Math.round((event.clientX - this.panX) / this.zoomLevel);
@@ -115,6 +117,12 @@ class CADGrid {
                 let circle = new Circle(this.startPoint[0],this.startPoint[1],Math.sqrt(Math.pow(this.panStartX - this.startPoint[0], 2) + Math.pow(this.panStartY - this.startPoint[1], 2)), 'blue');
                 this.drawShape(circle);
                 this.Draw = circle;
+            } else if (this.currShape === 'arc') {
+                let endAngle = Math.atan2(this.panStartY - this.startPoint[1], this.panStartX - this.startPoint[0]);
+                let r = Math.sqrt(Math.pow(this.panStartX - this.startPoint[0], 2) + Math.pow(this.panStartY - this.startPoint[1], 2));
+                let arc = new Arc(this.startPoint[0],this.startPoint[1],r, this.startAngle, endAngle, 'green');
+                this.drawShape(arc);
+                this.Draw = arc;
             }
         }
     }
@@ -138,6 +146,9 @@ class CADGrid {
             this.shapes.push(this.Draw);
             this.Draw = null;
         } else if (this.currShape === 'circle') {
+            this.shapes.push(this.Draw);
+            this.Draw = null;
+        } else if (this.currShape === 'arc') {
             this.shapes.push(this.Draw);
             this.Draw = null;
         }

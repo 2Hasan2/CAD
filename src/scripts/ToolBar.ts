@@ -47,7 +47,7 @@ class ToolsBar{
                     id:"arc",
                     icon:"arc",
                     action: () => {
-                        console.log('arc');
+                        cadGrid.setCurrShape('arc');
                     }
                 }
             ]
