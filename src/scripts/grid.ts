@@ -8,7 +8,6 @@ class CADGrid {
     private panX: number;
     private panY: number;
     private scale: number;
-    private arr: Array<number>;
 
     constructor(canvasId: string) {
         this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
@@ -20,7 +19,6 @@ class CADGrid {
         this.panX = this.canvas.width / 2;
         this.panY = this.canvas.height / 2;
         this.scale = 25;
-        this.arr=[]
 
         // Initialize canvas
         this.setCanvasSize();
@@ -119,9 +117,7 @@ class CADGrid {
         this.ctx.strokeStyle = '#000';
 
         this.scale = Math.pow(2, Math.round(Math.log2(50 / this.zoomLevel)));
-        
 
-        this.arr.push(this.scale)
 
 
         const numLinesX = Math.pow(3, Math.round(Math.log2(10000 / this.scale )));
