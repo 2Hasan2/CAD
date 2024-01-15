@@ -20,5 +20,10 @@
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "dxf": "^5.1.0",
+    "dxf-writer": "^1.18.4",
+    "makerjs": "^0.18.1"
   }
 }

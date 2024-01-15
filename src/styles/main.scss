@@ -27,6 +27,12 @@ body {
   width: 100vw;
   font: 16px/1.5 'Roboto', sans-serif;
   color: var(--color-primary);
+  // user select none
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -34,6 +40,13 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
   margin: 0 0 1rem 0;
   font-size: var(--font-size-h1);
+}
+
+button{
+  font: 400 'Roboto', sans-serif;
+  line-height: 1.2;
+  margin: 0 0 1rem 0;
+  font-size: var(--font-size-h5);
 }
 
 p { margin: 0 0 1rem 0; }
@@ -60,9 +73,12 @@ canvas {
   position: relative;
   display: block;
 }
-#position{
+#tools{
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1;
+}
+#position{
   z-index: 1;
 }

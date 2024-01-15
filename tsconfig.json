@@ -5,8 +5,7 @@
       "strict": true
     },
     "include": [
-      "src/**/*.ts"
-    ],
+      "src/**/*.{ts,tsx,js}"],
     "files": [
       "src/index.ts"
     ]
