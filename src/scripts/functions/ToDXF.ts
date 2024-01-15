@@ -10,7 +10,7 @@ function generateDXF(shapes: any[], filename: string) {
 
 	const model = { paths: pathObject };
 
-	const dxf = makerjs.exporter.toDXF(model);
+	const dxf = makerjs.exporter.toDXF(fixY(model))
 
 	// Create a Blob with the DXF content
 	const blob = new Blob([dxf], { type: 'application/dxf' });
@@ -37,26 +37,15 @@ function generateDXF(shapes: any[], filename: string) {
 export default generateDXF;
 
 
-// Usage example
-// const line = {
-// 	type: 'line',
-// 	origin: [0, 0],
-// 	end: [50, 50]
-// };
-
-// const circle = {
-// 	type: 'circle',
-// 	origin: [0, 0],
-// 	radius: 50
-// };
-
-// const circle2 = {
-// 	type: 'circle',
-// 	origin: [0, 0],
-// 	radius: 25
-// };
-
-// const shapes = [line, circle, circle2];
-// const filename = 'test.dxf';
-
-// generateDXF(shapes, filename);
+// multiple y axis in -1 because of the canvas coordinate system
+function fixY(model : any) {
+	let shapes=Object.keys(model.paths);
+	for (let shape of shapes) {
+		model.paths[shape].origin[1] = -model.paths[shape].origin[1];
+		model.paths[shape].end[1] = -model.paths[shape].end[1];
+		if (model.paths[shape].type == 'circle' || model.paths[shape].type == 'arc') {
+			model.paths[shape].radius = -model.paths[shape].radius;
+		} 
+	}
+	return model;
+}

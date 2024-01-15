@@ -103,27 +103,28 @@ class Circle implements Shape {
 
 }
 
+// const arc = {
+// 	type: 'arc',
+// 	origin: [50, 50],
+// 	radius: 50,
+// 	startAngle: 0,
+// 	endAngle: 1
+// };
+    
+
 /**
  * @class Arc
  * @implements {Shape}
  * @property {string} type - type of shape : arc
  * @property {[number, number]} origin - origin point of shape
  * @property {number} radius - radius of shape
- * @property {[number, number]} end - end point of shape
+ * @property {number} startAngle - start angle of arc
+ * @property {number} endAngle - end angle of arc
  * @property {string} color - color of shape
- * @method draw - draw shape on canvas
- * 
- * @param {number} originX - x coordinate of origin point
- * @param {number} originY - y coordinate of origin point
- * @param {number} radius - radius of shape
- * @param {number} endX - x coordinate of end point
- * @param {number} endY - y coordinate of end point
- * @param {string} color - color of shape
- * 
  * @returns {Shape} - arc shape
  * 
  * @example
- * const arc = new Arc(0, 0, 50, 100, 100, 'red');
+ * const arc = new Arc(0, 0, 50, 0, 1, 'red');
  * arc.draw(ctx);
  */
 
@@ -131,20 +132,22 @@ class Arc implements Shape {
     type: 'arc';
     origin: [number, number];
     radius: number;
-    end: [number, number];
+    startAngle: number;
+    endAngle: number;
     color: string;
 
-    constructor(originX: number, originY: number, radius: number, endX: number, endY: number, color: string) {
+    constructor(originX: number, originY: number, radius: number, startAngle: number, endAngle: number, color: string) {
         this.type = 'arc';
         this.origin = [originX, originY];
         this.radius = radius;
-        this.end = [endX, endY];
+        this.startAngle = startAngle;
+        this.endAngle = endAngle;
         this.color = color;
     }
 
     draw(ctx: CanvasRenderingContext2D) {
         ctx.beginPath();
-        ctx.arc(this.origin[0], this.origin[1], this.radius, 0, 2 * Math.PI);
+        ctx.arc(this.origin[0], this.origin[1], this.radius, this.startAngle, this.endAngle);
         ctx.strokeStyle = this.color;
         ctx.stroke();
     }

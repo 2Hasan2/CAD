@@ -1,3 +1,4 @@
+@import './toolbar.scss';
 :root {
   --font-size-h1: 2.5rem;
   --font-size-h2: 2rem;
@@ -27,39 +28,12 @@ body {
   width: 100vw;
   font: 16px/1.5 'Roboto', sans-serif;
   color: var(--color-primary);
-  // user select none
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
 }
-
-h1, h2, h3, h4, h5, h6 {
-  font: 400 'Roboto', sans-serif;
-  line-height: 1.2;
-  margin: 0 0 1rem 0;
-  font-size: var(--font-size-h1);
-}
-
-button{
-  font: 400 'Roboto', sans-serif;
-  line-height: 1.2;
-  margin: 0 0 1rem 0;
-  font-size: var(--font-size-h5);
-}
-
-p { margin: 0 0 1rem 0; }
-
-a {
-  text-decoration: none;
-  color: var(--color-primary);
-}
-
-ul { list-style: none; }
-
-img { max-width: 100%; }
-
 #app{
   position: relative;
   display: flex;
@@ -73,12 +47,56 @@ canvas {
   position: relative;
   display: block;
 }
-#tools{
-  position: absolute;
+// CAD STYLES
+#position{
+  position: fixed;
+  bottom: var(--font-size-h3);
+  left: var(--font-size-h3);
+  z-index: 1;
+}
+
+#nav{
+  position: fixed;
+  padding:10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 1rem;
   top: 0;
   left: 0;
   z-index: 1;
+  width: 100%;
+  background: #0005; 
 }
-#position{
-  z-index: 1;
+
+#nav div{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: #fff5;
+  color: #fff;
+  cursor: pointer;
+}
+
+#nav div div{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: #fff5;
+  color: #f30;
+  cursor: pointer;
+}
+
+#nav div div:hover{
+  background: #fff;
+  color: #f30;
 }

@@ -1,17 +1,21 @@
-import { Line, Circle, Shape } from './interfaces/Shapes';
-import generateDXF from './functions/ToDXF';
+import { Line, Circle, Shape, Arc } from './interfaces/Shapes';
 
 class CADGrid {
     private canvas: HTMLCanvasElement;
-    private ctx: CanvasRenderingContext2D;
+    ctx: CanvasRenderingContext2D;
     private zoomLevel: number;
     private panStartX: number;
     private panStartY: number;
+    private startPoint: [number, number];
+    private IsStartPointSet: boolean = true;
     private isPanning: boolean;
     private panX: number;
     private panY: number;
     private scale: number;
     private shapes: Shape[] = [];
+    private moveHand: boolean = false;
+    private currShape: string = '';
+    private Draw: any;
 
     constructor(canvasId: string) {
         this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
@@ -19,6 +23,7 @@ class CADGrid {
         this.zoomLevel = 3.5;
         this.panStartX = 0;
         this.panStartY = 0;
+        this.startPoint = [0, 0];
         this.isPanning = false;
         this.panX = this.canvas.width / 2;
         this.panY = this.canvas.height / 2;
@@ -82,22 +87,53 @@ class CADGrid {
 
     private handlePanMove(event: MouseEvent) {
         this.showCoordinates(event);
-        if (this.isPanning) {
-            const deltaX = event.clientX - this.panStartX;
-            const deltaY = event.clientY - this.panStartY;
+        const deltaX = event.clientX - this.panStartX;
+        const deltaY = event.clientY - this.panStartY;
 
-            this.panStartX = event.clientX;
-            this.panStartY = event.clientY;
-
+        this.panStartX = event.clientX;
+        this.panStartY = event.clientY;
+        
+        if (this.isPanning && this.moveHand) {
             this.panX += deltaX;
             this.panY += deltaY;
-
             this.drawGrid();
+        }
+        else if (this.isPanning && !this.moveHand) {
+            if (this.IsStartPointSet) {
+                this.startPoint = [Math.round((event.clientX - this.panX) / this.zoomLevel), Math.round((event.clientY - this.panY) / this.zoomLevel)];
+                this.IsStartPointSet = false;
+            }
+            this.panStartX = Math.round((event.clientX - this.panX) / this.zoomLevel);
+            this.panStartY = Math.round((event.clientY - this.panY) / this.zoomLevel);
+            this.drawGrid();
+            if (this.currShape === 'line') {
+                console.log(!this.moveHand, this.isPanning);
+                let line = new Line(this.startPoint[0],this.startPoint[1],this.panStartX, this.panStartY, 'red');
+                this.drawShape(line);
+                this.Draw = line;
+            }
         }
     }
 
-    private handlePanEnd(event: MouseEvent) {
+    setCurrShape(string: string) {
+        if (string === 'line') {
+            this.currShape = 'line';
+        }else if (string === 'circle') {
+            this.currShape = 'circle';
+        }else if (string === 'arc') {
+            this.currShape = 'arc';
+        }
+    }
+
+    private handlePanEnd() {
+        this.IsStartPointSet = true;
         this.isPanning = false;
+        // save shape
+        if (!this.Draw) return;
+        if (this.currShape === 'line') {
+            this.shapes.push(this.Draw);
+            this.Draw = null;
+        }
     }
 
     private drawGridLines(start: number, end: number, isVertical: boolean) {
@@ -131,21 +167,9 @@ class CADGrid {
         this.drawShapes();
     }
 
-    private drawShapes() {
-        let line = new Line(0, 0, 100.2, 0, 'red');
-        line.draw(this.ctx);
-        let line2 = new Line(0, 0, 100, 0, 'green');
-        line2.draw(this.ctx);
-        let circle = new Circle(0, 0, 55, 'blue');
-        circle.draw(this.ctx);
-
-        // this.shapes.push(line, line2, circle);
-        // console.log(this.shapes);
-    }
-
     private showCoordinates(event: MouseEvent) {
         const x = Math.round((event.clientX - this.panX) / this.zoomLevel);
-        const y = Math.round((event.clientY - this.panY) / this.zoomLevel);
+        const y = -Math.round((event.clientY - this.panY) / this.zoomLevel);
         const coordinates = `(${x}, ${y})`;
         document.getElementById('position')!.innerHTML = coordinates;
     }
@@ -156,7 +180,40 @@ class CADGrid {
         this.zoomLevel = 3.5;
         this.drawGrid();
     }
+
+    getShapes() {
+        return this.shapes;
+    }
+
+    drawShapes() {
+        this.shapes.forEach(shape => {
+            shape.draw(this.ctx);
+        });
+    }
+
+    drawShape(shape: Shape) {
+        shape.draw(this.ctx);
+    }
+
+    toggleMoveHand() {
+        this.moveHand = !this.moveHand;
+        this.canvas.style.cursor = this.moveHand ? 'move' : 'default';
+    }
 }
 
 // Create an instance of CADGrid with the canvas ID
 const cadGrid = new CADGrid('canvas');
+
+// cadGrid.addShape(new Line(0, 0, 100, 100, 'red'));
+// cadGrid.addShape(new Circle(0, 0, 50, 'blue'));
+// cadGrid.addShape(new Circle(100, 100, 50, 'green'));
+// cadGrid.addShape(new Arc(50, 50, 50, Math.PI / 2, Math.PI, 'green'));
+// cadGrid.addShape(new Arc(50, 50, 50, Math.PI * 1.5, 0, 'red'));
+
+// cadGrid.drawShapes();
+
+// console.log(cadGrid.getShapes());
+
+
+
+export default cadGrid;
