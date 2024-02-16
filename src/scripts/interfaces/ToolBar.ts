@@ -1,5 +1,5 @@
-import generateDXF from './functions/ToDXF';
-import {Line,Circle,Arc,Shape} from './interfaces/Shapes';
+import generateDXF from '../functions/ToDXF';
+import {Line,Circle,Shape} from '../components/Shapes';
 import cadGrid from './grid';
 
 
@@ -31,7 +31,7 @@ class ToolsBar{
                     id:"line",
                     icon:"line",
                     action: () => {
-                        cadGrid.setCurrShape('line');
+                        // cadGrid.setCurrShape('line');
                     }
                 },
                 {
@@ -39,7 +39,7 @@ class ToolsBar{
                     id:"circle",
                     icon:"circle",
                     action: () => {
-                        cadGrid.setCurrShape('circle');
+                        // cadGrid.setCurrShape('circle');
                     }
                 },
                 {
@@ -47,7 +47,7 @@ class ToolsBar{
                     id:"arc",
                     icon:"arc",
                     action: () => {
-                        cadGrid.setCurrShape('arc');
+                        // cadGrid.setCurrShape('arc');
                     }
                 }
             ]
@@ -102,7 +102,7 @@ class ToolsBar{
                     icon:"move",
                     action: () => {
                         const hand = document.getElementById('move');
-                        cadGrid.toggleMoveHand();
+                        // cadGrid.toggleMoveHand();
                         if (hand !== null) {
                             hand.innerText === 'move' ? hand.innerText = 'stop' : hand.innerText = 'move';
                         }
@@ -122,7 +122,7 @@ class ToolsBar{
                         action: () => {
                             let file_name = prompt("Please enter file name");
                             file_name = file_name? file_name : 'cad' ;
-                            generateDXF(cadGrid.getShapes(), `${file_name}.dxf`);
+                            // generateDXF(cadGrid.getShapes(), `${file_name}.dxf`);
                         }
                     }
                 ]
