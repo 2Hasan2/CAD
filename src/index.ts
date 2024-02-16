@@ -5,12 +5,14 @@ import ToolBoard from './scripts/interfaces/ToolBoard';
 // event listeners
 import { Keyboard } from './scripts/events/KeyBoard';
 import { Mouse } from './scripts/events/Mouse';
-import {Window} from './scripts/events/Window';
-
-import { DimensionTools } from "./scripts/tools/Dimensions";
 
 // shapes
-import {Circle, Line, Point, Shape} from './scripts/shapes/Shapes';
+import {Circle, Line, Point, Shape} from './scripts/entities/Shapes';
+
+
+// dxf writer
+import DXF from './scripts/utils/dxf';
+
 
 const cadGrid = new CADGrid('canvas');
 const toolBoard = new ToolBoard();
@@ -39,7 +41,6 @@ Mouse.click((event) => {
 		shape.setPos(pos.x, pos.y, end_pos.x, end_pos.y);
 		pos = end_pos
 		cadGrid.addShape(shape);
-		console.log('end draw');
 	}
 })
 
@@ -80,4 +81,11 @@ toolBoard.click((event)=>{
 		} else if(toolBoard.getTool()==="point"){
 			shape = new Point(pos.x, pos.y);
 		}
+})
+
+
+// when click on download-dxf
+document.getElementById('download-dxf')?.addEventListener('click', ()=>{
+	DXF.Save(cadGrid.copyShapes());
+	DXF.Download();
 })

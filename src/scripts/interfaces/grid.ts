@@ -1,4 +1,4 @@
-import { Shape, Circle, Line, Point } from "../shapes/Shapes";
+import { Shape, Circle, Line, Point } from "../entities/Shapes";
 class CADGrid {
 
     /**
@@ -263,6 +263,11 @@ class CADGrid {
                 // console.log('hovered', shape);
             }
         });
+    }
+
+    // copy the shapes
+    public copyShapes() {
+        return this.shapes.map(shape => shape.copy());
     }
 
 

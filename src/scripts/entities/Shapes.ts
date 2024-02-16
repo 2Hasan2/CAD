@@ -50,7 +50,7 @@ class Circle implements Shape {
     id: string;
     type: 'circle';
     origin: [number, number];
-    end?: [number, number] | undefined;
+    end: [number, number] | undefined;
     radius: number;
 
     constructor(originX: number, originY: number, endX: number, endY: number) {

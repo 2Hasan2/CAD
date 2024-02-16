@@ -1,4 +1,4 @@
-import { Line, Circle } from '../shapes/Shapes'; // Importing the Line and Circle classes from the shapes module
+import { Line, Circle } from '../entities/Shapes'; // Importing the Line and Circle classes from the shapes module
 
 class DimensionTools {
 	static ctx: CanvasRenderingContext2D; // Assuming ctx is set before using any drawing methods
