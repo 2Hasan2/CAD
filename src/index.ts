@@ -141,9 +141,3 @@ document.getElementById('dxf')?.addEventListener('click', ()=>{
 document.getElementById('dimension')?.addEventListener('click', (event)=>{
 	tool.tool = "dimension";
 })
-
-// create two point to test the dimension
-let p1 = new Point(-30, 0);
-let p2 = new Point(30, 10);
-cadGrid.addShape(p1);
-cadGrid.addShape(p2);
