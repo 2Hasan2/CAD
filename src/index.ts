@@ -7,6 +7,8 @@ import { Keyboard } from './scripts/events/KeyBoard';
 import { Mouse } from './scripts/events/Mouse';
 import {Window} from './scripts/events/Window';
 
+import { DimensionTools } from "./scripts/tools/Dimensions";
+
 // shapes
 import {Circle, Line, Point, Shape} from './scripts/shapes/Shapes';
 
@@ -19,17 +21,15 @@ let shape : Shape | null = null;
 
 
 Mouse.click((event) => {
-
+	if(!(event.target instanceof HTMLCanvasElement)) return;
 	
 	if (!shape) return;
 	if(is_first && shape.type !== 'point'){
-		console.log('start drawing');
 		pos= cadGrid.getMousePosition(event);
 		shape.setPos(pos.x, pos.y, pos.x, pos.y);
 		cadGrid.demoShape = shape;
 		is_first= false;
 	} else if (shape.type === 'point'){
-		console.log('point');
 		pos= cadGrid.getMousePosition(event);
 		shape.setPos(pos.x, pos.y, pos.x, pos.y);
 		cadGrid.addShape(shape);
@@ -70,4 +70,14 @@ Keyboard.click((event)=>{
 			shape = new Point(pos.x, pos.y);
 		}
 		cadGrid.drawGrid();
+})
+
+toolBoard.click((event)=>{
+		if(toolBoard.getTool()==="line"){
+			shape = new Line(pos.x, pos.y, pos.x, pos.y);
+		} else if(toolBoard.getTool()==="circle"){
+			shape = new Circle(pos.x, pos.y, pos.x, pos.y);
+		} else if(toolBoard.getTool()==="point"){
+			shape = new Point(pos.x, pos.y);
+		}
 })

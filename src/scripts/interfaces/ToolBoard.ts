@@ -1,18 +1,18 @@
-// tool bar 
 const ToolEle = document.getElementById('toolbar') as HTMLDivElement;
 
-// Tool bar
 export class ToolBoard {
 	private tool: string;
 	private toolEle: HTMLDivElement;
 	private toolList: string[];
 	private toolMap: Map<string, HTMLButtonElement>;
+	private clickCallback: (tool: string) => void;
 
 	constructor() {
-		this.tool = ""
+		this.tool = "";
 		this.toolEle = ToolEle;
 		this.toolList = ['line', 'circle', 'point'];
 		this.toolMap = new Map();
+		this.clickCallback = () => { };
 		this.init();
 	}
 
@@ -33,10 +33,16 @@ export class ToolBoard {
 
 	private changeTool(tool: string) {
 		this.tool = tool;
+		// Call the callback with the updated tool
+		this.clickCallback(tool);
 	}
 
 	public getTool() {
 		return this.tool;
+	}
+
+	public click(callback: (tool: string) => void) {
+		this.clickCallback = callback;
 	}
 }
 

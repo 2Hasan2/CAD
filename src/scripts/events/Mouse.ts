@@ -3,10 +3,11 @@ class Mouse {
   static move(callback: (event: MouseEvent) => void) {
 	window.addEventListener('mousemove', (event) => callback(event));
   }
-  // make a static method to handle the mouse down event
-  static down(callback: (event: MouseEvent) => void) {
-	window.addEventListener('mousedown', (event) => callback(event));
+
+  static hold(callback: (event: MouseEvent) => void) {
+      window.addEventListener('mousedown', (event) => callback(event));
   }
+
   // make a static method to handle the mouse up event
   static up(callback: (event: MouseEvent) => void) {
 	window.addEventListener('mouseup', (event) => callback(event));

@@ -1,5 +1,4 @@
 import { Shape, Circle, Line, Point } from "../shapes/Shapes";
-
 class CADGrid {
 
     /**
