@@ -238,6 +238,10 @@ class CADGrid {
         ctx.moveTo(shape.origin[0] * this.zoomLevel + this.panX, -shape.origin[1] * this.zoomLevel + this.panY);
         ctx.lineTo(shape.end[0] * this.zoomLevel + this.panX, -shape.end[1] * this.zoomLevel + this.panY);
         ctx.stroke();
+        // draw children points
+        shape.getChildrenPoints().forEach(point => {
+            this.drawShapePoint(point);
+        });
     }
 
     private drawShapeCircle(shape: Circle) {
@@ -262,11 +266,11 @@ class CADGrid {
     public hoverShape(event: MouseEvent) : Shape | undefined{
         const mousePos = this.getMousePosition(event);
         let shape = this.shapes.find(shape => {
-            if (shape.is_hovered(mousePos.x, mousePos.y)) {
+            if (shape.is_hovered(mousePos.x, mousePos.y) && shape.type == "point") {
                 return shape;
             }
         })
-        return shape;        
+        return shape 
     }
 
     // copy the shapes

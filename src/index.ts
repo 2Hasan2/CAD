@@ -46,11 +46,13 @@ Mouse.click((event) => {
 		if(DimensionTools.p1 === undefined){
 			if (cadGrid.hoverShape(event)){
 				DimensionTools.setP1(cadGrid.hoverShape(event) as Point);
+				console.log(DimensionTools.p1);
 			}
 		} else if(DimensionTools.p2 === undefined){
 			if (cadGrid.hoverShape(event)) {
 				DimensionTools.setP2(cadGrid.hoverShape(event) as Point);
 				const dim = DimensionTools.DimTwoPoints();
+				console.log(DimensionTools.p2);
 				cadGrid.addDims(dim);
 				DimensionTools.p1 = undefined;
 				DimensionTools.p2 = undefined;
@@ -85,8 +87,6 @@ Mouse.move((event)=>{
 	
 		if (tool.tool === "dimension" && DimensionTools.p1 !== undefined && DimensionTools.p2 === undefined) {
 			const dim = DimensionTools.convertDim(DimensionTools.p1.origin[0], DimensionTools.p1.origin[1], cadGrid.getMousePosition(event).x, cadGrid.getMousePosition(event).y);
-			console.log('from' , dim.start, 'to', dim.end, 'dim', dim.dim);
-			
 			cadGrid.drawDims(dim);
 		} else{
 			if (is_first || !shape) return;

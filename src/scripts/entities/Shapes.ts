@@ -3,7 +3,7 @@ interface Shape {
     id: string;
     type: 'line' | 'circle' | "point";
     origin: [number, number];
-    children?: Shape[];
+    children?: Point[];
     radius?: number;
     end?: [number, number];
     setPos(originX: number, originY: number, endX: number, endY: number): void;
@@ -17,15 +17,21 @@ class Line implements Shape {
     origin: [number, number];
     end: [number, number];
     middle: [number, number];
-    children?: Shape[] | [];
+    children?: Point[] | [];
 
 
-    constructor(originX: number, originY: number, endX: number, endY: number) {
+
+    constructor(originX: number, originY: number, endX: number, endY: number, children?: Point[] | []) {
         this.id = Math.random().toString(36).substr(2, 9);
         this.type = 'line';
         this.origin = [originX, originY];
         this.end = [endX, endY];
         this.middle = [originX + (endX - originX) / 2, originY + (endY - originY) / 2];
+    }
+
+    // children point is the start and end and the middle of the line
+    getChildrenPoints(){
+        return [new Point(this.origin[0], this.origin[1]), new Point(this.end[0], this.end[1]), new Point(this.middle[0], this.middle[1])];
     }
 
 
@@ -41,7 +47,7 @@ class Line implements Shape {
     }
 
     copy(): Shape {
-        return new Line(this.origin[0], this.origin[1], this.end[0], this.end[1]);
+        return new Line(this.origin[0], this.origin[1], this.end[0], this.end[1], this.children);
     }
 
 }
@@ -90,7 +96,7 @@ class Point implements Shape {
     }
     is_hovered(x: number, y: number): boolean {
         const distance = Math.sqrt(Math.pow(x - this.origin[0], 2) + Math.pow(y - this.origin[1], 2));
-        return distance <= 1;
+        return distance <= 5;
     }
 
     setPos(originX: number, originY: number, endX: number, endY: number): void {
