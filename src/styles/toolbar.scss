@@ -1,53 +1,39 @@
-:root {
-    --main-bg-color: #36393f;
-    --secondary-bg-color: #2f3136;
-    --border-color: #202225;
-    --text-color: #b9bbbe;
-    --font-size: 20px;
-    --line-height: 50px;
-}
-
 #toolbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    background-color: var(--main-bg-color);
-    z-index: 1;
-    flex-direction: row;
+	position: fixed;
+	width: 100%;
+	top: 0;
+	left: 0;
+	background-color: #f4f4f4;
+  	padding: 2px;
+  	border-bottom: 1px solid #e0e0e0;
+  	display: flex;
+  	justify-content: space-between;
+  	align-items: center;
+  	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	z-index: 1;
 
-    .group {
-    align-items: center;
-    background-color: var(--secondary-bg-color);
-    border-radius: 0.5rem;
-    flex-direction: column;
-        .group-name {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: var(--font-size);
-            font-weight: bold;
-            color: var(--text-color);
-        }
-    }
+	div {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		background: #fff5;
+		color: #fff;
+		cursor: pointer;
 
-    .tools {
-        display: flex;
-        gap: 0.5rem;
-
-        .tool {
-            display: flex;
-            font-size: var(--font-size);
-            cursor: pointer;
-            color: var(--text-color);
-            padding: 0.5rem;
-
-            &:hover {
-                background-color: var(--border-color);
-            }
-        }
-    }
+		button {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			padding: 0.5rem;
+			border-radius: 0.5rem;
+			font-size: large;
+			background: #fff5;
+		}
+	}
 }

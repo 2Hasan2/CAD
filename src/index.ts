@@ -1,5 +1,6 @@
 import './styles/main.scss';
 import CADGrid from './scripts/interfaces/grid';
+import ToolBoard from './scripts/interfaces/ToolBoard';
 
 // event listeners
 import { Keyboard } from './scripts/events/KeyBoard';
@@ -10,6 +11,7 @@ import {Window} from './scripts/events/Window';
 import {Circle, Line, Point, Shape} from './scripts/shapes/Shapes';
 
 const cadGrid = new CADGrid('canvas');
+const toolBoard = new ToolBoard();
 
 let pos= {x: 0, y: 0};
 let is_first= true;
@@ -17,6 +19,8 @@ let shape : Shape | null = null;
 
 
 Mouse.click((event) => {
+
+	
 	if (!shape) return;
 	if(is_first && shape.type !== 'point'){
 		console.log('start drawing');
@@ -46,7 +50,6 @@ Mouse.move((event)=>{
 		shape.setPos(pos.x, pos.y, end_pos.x, end_pos.y);
 		cadGrid.demoShape = shape;
 		cadGrid.drawGrid();
-
 })
 
 Keyboard.click((event)=>{
