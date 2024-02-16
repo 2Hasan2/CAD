@@ -3,6 +3,7 @@ interface Shape {
     id: string;
     type: 'line' | 'circle' | "point";
     origin: [number, number];
+    children?: Shape[];
     radius?: number;
     end?: [number, number];
     setPos(originX: number, originY: number, endX: number, endY: number): void;
@@ -16,6 +17,8 @@ class Line implements Shape {
     origin: [number, number];
     end: [number, number];
     middle: [number, number];
+    children?: Shape[] | [];
+
 
     constructor(originX: number, originY: number, endX: number, endY: number) {
         this.id = Math.random().toString(36).substr(2, 9);
@@ -27,7 +30,8 @@ class Line implements Shape {
 
 
     is_hovered(x: number, y: number): boolean {
-        return (x > this.origin[0] && x < this.end[0] && y > this.origin[1] && y < this.end[1]);
+        const distance = Math.sqrt(Math.pow(x - this.origin[0], 2) + Math.pow(y - this.origin[1], 2)) + Math.sqrt(Math.pow(x - this.end[0], 2) + Math.pow(y - this.end[1], 2));
+        return distance <= Math.sqrt(Math.pow(this.end[0] - this.origin[0], 2) + Math.pow(this.end[1] - this.origin[1], 2)) + 1;
     }
 
     setPos(originX: number, originY: number, endX: number, endY: number): void {
@@ -57,9 +61,10 @@ class Circle implements Shape {
     }
 
     is_hovered(x: number, y: number): boolean {
-        const dx = this.origin[0] - x;
-        const dy = this.origin[1] - y;
-        return dx * dx + dy * dy < this.radius * this.radius;
+        const distanceSquared = Math.pow(x - this.origin[0], 2) + Math.pow(y - this.origin[1], 2);
+        const max = Math.pow(this.radius + 1, 2)
+        const min = Math.pow(this.radius - 1, 2)
+        return (distanceSquared <= max && distanceSquared >= min)
     }
 
     setPos(originX: number, originY: number, endX: number, endY: number): void {
@@ -84,9 +89,8 @@ class Point implements Shape {
         this.origin = [originX, originY];
     }
     is_hovered(x: number, y: number): boolean {
-        const dx = this.origin[0] - x;
-        const dy = this.origin[1] - y;
-        return dx * dx + dy * dy < 4;
+        const distance = Math.sqrt(Math.pow(x - this.origin[0], 2) + Math.pow(y - this.origin[1], 2));
+        return distance <= 1;
     }
 
     setPos(originX: number, originY: number, endX: number, endY: number): void {

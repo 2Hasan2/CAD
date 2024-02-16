@@ -11,8 +11,6 @@ import {Circle, Line, Point, Shape} from './scripts/shapes/Shapes';
 
 const cadGrid = new CADGrid('canvas');
 
-
-
 let pos= {x: 0, y: 0};
 let is_first= true;
 let shape : Shape | null = null;
@@ -20,28 +18,35 @@ let shape : Shape | null = null;
 
 Mouse.click((event) => {
 	if (!shape) return;
-	if(is_first){
-		console.log('start drawing shape');
+	if(is_first && shape.type !== 'point'){
+		console.log('start drawing');
 		pos= cadGrid.getMousePosition(event);
 		shape.setPos(pos.x, pos.y, pos.x, pos.y);
 		cadGrid.demoShape = shape;
 		is_first= false;
-	}else{
-		const end_pos= cadGrid.getMousePosition(event);
+	} else if (shape.type === 'point'){
+		console.log('point');
+		pos= cadGrid.getMousePosition(event);
+		shape.setPos(pos.x, pos.y, pos.x, pos.y);
+		cadGrid.addShape(shape);
+		is_first= true;
+	} else {
+		const end_pos = cadGrid.getMousePosition(event);
 		shape.setPos(pos.x, pos.y, end_pos.x, end_pos.y);
 		pos = end_pos
 		cadGrid.addShape(shape);
-		console.log("added shape");
-		
+		console.log('end draw');
 	}
 })
 
 Mouse.move((event)=>{
+		cadGrid.hoverShape(event);
 		if (is_first || !shape) return;
 		const end_pos= cadGrid.getMousePosition(event);
 		shape.setPos(pos.x, pos.y, end_pos.x, end_pos.y);
 		cadGrid.demoShape = shape;
 		cadGrid.drawGrid();
+
 })
 
 Keyboard.click((event)=>{

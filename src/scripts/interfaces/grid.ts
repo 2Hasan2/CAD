@@ -204,10 +204,22 @@ class CADGrid {
         });
     }
 
+    private ifThereIsPoint(x: number, y: number) {
+        return this.shapes.map(shape => {
+            if (shape.type === 'point') {
+                if (shape.origin[0] === x && shape.origin[1] === y) {
+                    return true;
+                }
+            }
+        }).includes(true);
+    }
+
 
     public addShape(shape: Shape) {
+        let there= this.ifThereIsPoint(shape.origin[0], shape.origin[1]);
+        if (there) return;
         this.shapes.push(shape.copy());
-        this.drawShapes();
+        this.drawGrid()
     }
 
     public removeShape(id: string) {
@@ -242,6 +254,18 @@ class CADGrid {
         ctx.arc(shape.origin[0] * this.zoomLevel + this.panX, -shape.origin[1] * this.zoomLevel + this.panY, 2, 0, 2 * Math.PI);
         ctx.stroke();
     }
+
+    // the hover method
+    public hoverShape(event: MouseEvent) {
+        const mousePos = this.getMousePosition(event);
+        
+        this.shapes.forEach(shape => {
+            if (shape.is_hovered(mousePos.x, mousePos.y)) {
+                // console.log('hovered', shape);
+            }
+        });
+    }
+
 
 }
 
