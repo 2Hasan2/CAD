@@ -6,13 +6,14 @@ import ToolBoard from './scripts/interfaces/ToolBoard';
 import { Keyboard } from './scripts/events/KeyBoard';
 import { Mouse } from './scripts/events/Mouse';
 
+// dimension tool
+import { DimensionTools } from './scripts/entities/Dimensions';
+
 // shapes
 import {Circle, Line, Point, Shape} from './scripts/entities/Shapes';
 
-
 // dxf writer
 import DXF from './scripts/utils/dxf';
-
 
 const cadGrid = new CADGrid('canvas');
 const toolBoard = new ToolBoard();
@@ -21,9 +22,44 @@ let pos= {x: 0, y: 0};
 let is_first= true;
 let shape : Shape | null = null;
 
+// watch for the tool change use proxy
+let handler = {
+	set: function (obj: any, prop: string, value: any) {
+		obj[prop] = value;
+		if (prop === "tool") {
+			if (value === "dimension") {
+			}
+		}
+		return true;
+	}
+}
+
+
+
+let tool = new Proxy({tool: ""}, handler);
+
 
 Mouse.click((event) => {
 	if(!(event.target instanceof HTMLCanvasElement)) return;
+
+	if(tool.tool === "dimension"){
+		if(DimensionTools.p1 === undefined){
+			if (cadGrid.hoverShape(event)){
+				DimensionTools.setP1(cadGrid.hoverShape(event) as Point);
+			}
+		} else if(DimensionTools.p2 === undefined){
+			if (cadGrid.hoverShape(event)) {
+				DimensionTools.setP2(cadGrid.hoverShape(event) as Point);
+				const dim = DimensionTools.DimTwoPoints();
+				cadGrid.addDims(dim);
+				DimensionTools.p1 = undefined;
+				DimensionTools.p2 = undefined;
+				tool.tool = "";
+			}
+		}
+		return;
+		
+	}
 	
 	if (!shape) return;
 	if(is_first && shape.type !== 'point'){
@@ -44,20 +80,30 @@ Mouse.click((event) => {
 	}
 })
 
+
 Mouse.move((event)=>{
-		cadGrid.hoverShape(event);
-		if (is_first || !shape) return;
-		const end_pos= cadGrid.getMousePosition(event);
-		shape.setPos(pos.x, pos.y, end_pos.x, end_pos.y);
-		cadGrid.demoShape = shape;
+	
+		if (tool.tool === "dimension" && DimensionTools.p1 !== undefined && DimensionTools.p2 === undefined) {
+			const dim = DimensionTools.convertDim(DimensionTools.p1.origin[0], DimensionTools.p1.origin[1], cadGrid.getMousePosition(event).x, cadGrid.getMousePosition(event).y);
+			console.log('from' , dim.start, 'to', dim.end, 'dim', dim.dim);
+			
+			cadGrid.drawDims(dim);
+		} else{
+			if (is_first || !shape) return;
+			const end_pos= cadGrid.getMousePosition(event);
+			shape.setPos(pos.x, pos.y, end_pos.x, end_pos.y);
+			cadGrid.demoShape = shape;
+		}
+		
 		cadGrid.drawGrid();
 })
 
 Keyboard.click((event)=>{
 	if(event.key === 'Escape'){
 		is_first= true;
-		cadGrid.demoShape = null;
+		cadGrid.demoShape = undefined
 		shape = null;
+		tool.tool = ""
 		cadGrid.drawGrid();
 	}
 })
@@ -85,7 +131,19 @@ toolBoard.click((event)=>{
 
 
 // when click on download-dxf
-document.getElementById('download-dxf')?.addEventListener('click', ()=>{
+document.getElementById('dxf')?.addEventListener('click', ()=>{
+	tool.tool = "dxf";
 	DXF.Save(cadGrid.copyShapes());
 	DXF.Download();
 })
+
+// handle dimension
+document.getElementById('dimension')?.addEventListener('click', (event)=>{
+	tool.tool = "dimension";
+})
+
+// create two point to test the dimension
+let p1 = new Point(-30, 0);
+let p2 = new Point(30, 10);
+cadGrid.addShape(p1);
+cadGrid.addShape(p2);

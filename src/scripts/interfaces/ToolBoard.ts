@@ -10,7 +10,7 @@ export class ToolBoard {
 	constructor() {
 		this.tool = "";
 		this.toolEle = ToolEle;
-		this.toolList = ['line', 'circle', 'point'];
+		this.toolList = [ 'dxf','line', 'circle', 'point', 'dimension'];
 		this.toolMap = new Map();
 		this.clickCallback = () => { };
 		this.init();
@@ -22,6 +22,7 @@ export class ToolBoard {
 			div.classList.add('tool');
 			const button = document.createElement('button');
 			button.classList.add('btn');
+			button.id = tool;
 			button.classList.add('btn-light');
 			button.innerHTML = tool;
 			button.onclick = () => this.changeTool(tool);

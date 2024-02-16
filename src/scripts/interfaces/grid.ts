@@ -1,4 +1,5 @@
 import { Shape, Circle, Line, Point } from "../entities/Shapes";
+import { Dimension } from "../entities/Dimensions";
 class CADGrid {
 
     /**
@@ -33,7 +34,8 @@ class CADGrid {
     private panX: number;
     private panY: number;
     public shapes: Shape[] = [];
-    public demoShape: Shape | null;
+    public demoShape: Shape | undefined;
+    public DimsArray: Dimension[] = []
 
     constructor(canvasId: string) {
         this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
@@ -44,7 +46,8 @@ class CADGrid {
         this.isPanning = false;
         this.panX = this.canvas.width / 2;
         this.panY = this.canvas.height / 2;
-        this.demoShape = null
+        this.demoShape = undefined
+        this.DimsArray = []
 
         this.setCanvasSize();
         this.setupEventListeners();
@@ -125,6 +128,7 @@ class CADGrid {
         this.drawGridLines();
         this.drawDemoShapes();
         this.drawShapes();
+        this.drawAllDims();
     }
 
     private drawGridLines() {
@@ -215,7 +219,7 @@ class CADGrid {
 
 
     public addShape(shape: Shape) {
-        let there= this.ifThereIsPoint(shape.origin[0], shape.origin[1]);
+        let there= this.ifThereIsPoint(shape.origin[0], shape.origin[1]) && shape.type == "point";
         if (there) return;
         this.shapes.push(shape.copy());
         this.drawGrid()
@@ -255,14 +259,14 @@ class CADGrid {
     }
 
     // the hover method
-    public hoverShape(event: MouseEvent) {
+    public hoverShape(event: MouseEvent) : Shape | undefined{
         const mousePos = this.getMousePosition(event);
-        
-        this.shapes.forEach(shape => {
+        let shape = this.shapes.find(shape => {
             if (shape.is_hovered(mousePos.x, mousePos.y)) {
-                // console.log('hovered', shape);
+                return shape;
             }
-        });
+        })
+        return shape;        
     }
 
     // copy the shapes
@@ -271,6 +275,53 @@ class CADGrid {
     }
 
 
-}
+    // add dimension
 
+    public addDims(dim: Dimension) {
+        this.DimsArray.push(dim);
+        this.drawDims(dim);
+    }
+
+    public drawDims( dim: Dimension) {
+            const ctx = this.ctx;
+            ctx.beginPath();
+            ctx.strokeStyle = '#630';
+            ctx.lineWidth = 1;
+            // draw dim up line 
+            let x1 = dim.start[0] * this.zoomLevel + this.panX;
+            let y1 = -dim.start[1] * this.zoomLevel + this.panY;
+            let x2 = dim.end[0] * this.zoomLevel + this.panX;
+            let y2 = -dim.end[1] * this.zoomLevel + this.panY;
+
+            let { x, y } = UpByAngle(x1, y1, dim.angle, dim.len/5);
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x, y);
+            let { x: x3, y: y3 } = UpByAngle(x2, y2, dim.angle, dim.len/5);
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x3, y3);
+            ctx.moveTo(x, y);
+            ctx.lineTo(x3, y3);
+            // font size is negative or positive based on the y position and the angle
+            let fontSize = 20;
+            ctx.font = `${Math.abs(fontSize)}px Arial`;
+            let text = dim.len.toFixed(2).toString().concat('mm');
+            x = dim.dim[0] * this.zoomLevel + this.panX - 10;
+            y = -dim.dim[1] * this.zoomLevel + this.panY - 15;
+            ctx.fillText(text, x, y);
+            // draw dim line
+            ctx.stroke();
+    }
+
+    private drawAllDims() {
+        this.DimsArray.forEach(dim => {
+            this.drawDims(dim);
+        });
+    }
+
+}
 export default CADGrid;
+
+function UpByAngle(x: number, y: number, angle: number, length: number): { x: number, y: number } {
+    const radians = (-90 - angle) * Math.PI / 180;
+    return { x: x + length * Math.cos(radians), y: y + length * Math.sin(radians) };
+}
