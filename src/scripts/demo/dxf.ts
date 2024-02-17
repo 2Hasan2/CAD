@@ -359,7 +359,7 @@ const polygon = new Polygon([
 ]);
 
 const linearPattern = new LinearPattern([line, circle], 20, 20, 10);
-const circularPattern = new CircularPattern([rectangle], 0, 0, 5, 1);
+const circularPattern = new CircularPattern([polygon], 0, 0, 5, 1);
 const mirrorX = new Mirror([line, circle], 'x', 0);
 const mirrorY = new Mirror([line, circle], 'y', 0);
 
@@ -373,7 +373,7 @@ const dxfDoc = new DXFDocument();
 //* dxfDoc.addShape(rectangle); test is done
 //* dxfDoc.addShape(polygon); test is done
 //* dxfDoc.addShape(linearPattern); test is done
-dxfDoc.addShape(circularPattern); //? test is done in [ Circle , Line , arc ,point , rectangle ]
+dxfDoc.addShape(circularPattern); //? test is done in [ Circle , Line , Arc ,Point  , Rectangle , Polygon]
 //? dxfDoc.addShape(mirrorX); 
 //? dxfDoc.addShape(mirrorY);
 //? dxfDoc.addShape(group);
