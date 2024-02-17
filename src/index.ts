@@ -12,9 +12,6 @@ import { DimensionTools } from './scripts/entities/Dimensions';
 // shapes
 import {Circle, Line, Point, Shape} from './scripts/entities/Shapes';
 
-// dxf writer
-import DXF from './scripts/utils/dxf';
-
 const cadGrid = new CADGrid('canvas');
 const toolBoard = new ToolBoard();
 
@@ -129,13 +126,6 @@ toolBoard.click((event)=>{
 		}
 })
 
-
-// when click on download-dxf
-document.getElementById('dxf')?.addEventListener('click', ()=>{
-	tool.tool = "dxf";
-	DXF.Save(cadGrid.copyShapes());
-	DXF.Download();
-})
 
 // handle dimension
 document.getElementById('dimension')?.addEventListener('click', (event)=>{
