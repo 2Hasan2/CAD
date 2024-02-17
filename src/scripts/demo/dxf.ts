@@ -230,11 +230,9 @@ class Mirror {
 			} else if (entity instanceof Circle) {
 				return new Circle(entity.centerX, 2 * mirrorPosition - entity.centerY, entity.radius);
 			} else if (entity instanceof Arc) {
-				// coming soon
-				return entity;
+				return new Arc(entity.centerX, 2 * mirrorPosition - entity.centerY, entity.radius, entity.startAngle, entity.endAngle);
 			} else if (entity instanceof Rectangle) {
-				// coming soon
-				return entity;
+				return new Rectangle(entity.x, 2 * mirrorPosition - entity.y, entity.width, entity.height);
 			} else if (entity instanceof Point) {
 				return new Point(entity.x, 2 * mirrorPosition - entity.y);
 			} else if (entity instanceof Polygon) {
@@ -249,11 +247,9 @@ class Mirror {
 			} else if (entity instanceof Circle) {
 				return new Circle(2 * mirrorPosition - entity.centerX, entity.centerY, entity.radius);
 			} else if (entity instanceof Arc) {
-				// coming soon
-				return entity;
+				return new Arc(2 * mirrorPosition - entity.centerX, entity.centerY, entity.radius, entity.startAngle, entity.endAngle);
 			} else if (entity instanceof Rectangle) {
-				// coming soon
-				return entity;
+				return new Rectangle(2 * mirrorPosition - entity.x, entity.y, entity.width, entity.height);
 			} else if (entity instanceof Point) {
 				return new Point(2 * mirrorPosition - entity.x, entity.y);
 			} else if (entity instanceof Polygon) {
@@ -360,10 +356,11 @@ const polygon = new Polygon([
 
 const linearPattern = new LinearPattern([line, circle], 20, 20, 10);
 const circularPattern = new CircularPattern([point], 0, 0, 5, 1);
-const mirrorX = new Mirror([line, circle], 'x', 0);
-const mirrorY = new Mirror([line, circle], 'y', 0);
+const shapes = [arc, rectangle, polygon,]
+const mirrorX = new Mirror(shapes, 'x', 0);
+const mirrorY = new Mirror(shapes, 'y', 0);
 
-// const group = new Group([line, circle, point, arc, rectangle, polygon, linearPattern, circularPattern, mirrorX, mirrorY]);
+const group = new Group([line, circle, point, arc, rectangle, polygon]);
 
 const dxfDoc = new DXFDocument();
 //* dxfDoc.addShape(circle); test is done
@@ -373,10 +370,10 @@ const dxfDoc = new DXFDocument();
 //* dxfDoc.addShape(rectangle); test is done
 //* dxfDoc.addShape(polygon); test is done
 //* dxfDoc.addShape(linearPattern); test is done
-dxfDoc.addShape(circularPattern); //? test is done in [ Circle , Line , Arc ,Point  , Rectangle , Polygon]
-//? dxfDoc.addShape(mirrorX); 
-//? dxfDoc.addShape(mirrorY);
-//? dxfDoc.addShape(group);
+//* dxfDoc.addShape(circularPattern); test is done
+//* dxfDoc.addShape(mirrorY);  test is done
+//* dxfDoc.addShape(mirrorY);  test is done
+dxfDoc.addShape(group);
 
 const dxfContent = dxfDoc.generateDXF();
 
