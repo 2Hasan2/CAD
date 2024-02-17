@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-
 class Point {
 	constructor(public x: number, public y: number) { }
 
@@ -292,9 +290,9 @@ class Mirror {
 // }
 
 class DXFDocument {
-	private entities: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror | Group)[] = [];
+	private entities: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror )[] = [];
 
-	addShape(shape: Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror | Group): void {
+	addShape(shape: Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror): void {
 		this.entities.push(shape);
 	}
 
@@ -337,39 +335,42 @@ EOF`;
 	}
 }
 
-// Usage example:
-const line = new Line(0, 0, 30, 70);
-const circle = new Circle(30, 70, 25);
-const point = new Point(10, 20);
-const arc = new Arc(75, 75, 50, 45, 135);
-const rectangle = new Rectangle(100, 100, 50, 30);
-const polygon = new Polygon([
-	new Point(200, 200),
-	new Point(250, 250),
-	new Point(300, 200),
-	new Point(250, 150),
-]);
+export { Line, Circle, Point, Arc, Rectangle, Polygon, LinearPattern, CircularPattern, Mirror, DXFDocument };
 
-const linearPattern = new LinearPattern([line, circle], 20, 20, 10);
-const circularPattern = new CircularPattern([point], 0, 0, 5, 1);
-const shapes = [arc, rectangle, polygon,]
-const mirrorX = new Mirror(shapes, 'x', 0);
-const mirrorY = new Mirror(shapes, 'y', 0);
+// Document
+const dxfDocument = new DXFDocument();
 
-// const group = new Group([line, circle, point, arc, rectangle, polygon]);
+// Shapes
+const line = new Line(0, 0, 100, 100);
+const circle = new Circle(0, 0, 50);
+const point = new Point(0, 0);
+const arc = new Arc(0, 0, 50, 0, 90);
+const rectangle = new Rectangle(0, 0, 100, 100);
+const polygon = new Polygon([new Point(0, 0), new Point(100, 0), new Point(100, 100), new Point(0, 100)]);
+const linearPattern = new LinearPattern([line, circle, arc, rectangle, point, polygon], 100, 100, 3);
+const circularPattern = new CircularPattern([line, circle, arc, rectangle, point, polygon], 0, 0, 3, 1);
+const mirror = new Mirror([line, circle, arc, rectangle, point, polygon], 'x', 0);
 
-const dxfDoc = new DXFDocument();
-//* dxfDoc.addShape(circle); test is done
-//* dxfDoc.addShape(line); test is done
-//* dxfDoc.addShape(point); test is done
-//* dxfDoc.addShape(arc); test is done
-//* dxfDoc.addShape(rectangle); test is done
-//* dxfDoc.addShape(polygon); test is done
-//* dxfDoc.addShape(linearPattern); test is done
-//* dxfDoc.addShape(circularPattern); test is done
-//* dxfDoc.addShape(mirrorY);  test is done
-//* dxfDoc.addShape(mirrorY);  test is done
+// Add shapes to document
+dxfDocument.addShape(line);
+dxfDocument.addShape(circle);
+dxfDocument.addShape(point);
+dxfDocument.addShape(arc);
+dxfDocument.addShape(rectangle);
+dxfDocument.addShape(polygon);
+dxfDocument.addShape(linearPattern);
+dxfDocument.addShape(circularPattern);
+dxfDocument.addShape(mirror);
 
-const dxfContent = dxfDoc.generateDXF();
+// Generate DXF
+const dxfString = dxfDocument.generateDXF();
+console.log(dxfString);
 
-fs.writeFileSync('output.dxf', dxfContent);
+// Output as downloadeable file
+const blob = new Blob([dxfString], { type: 'text/plain' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = 'example.dxf';
+a.click();
+URL.revokeObjectURL(url);
