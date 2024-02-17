@@ -1,5 +1,8 @@
+//  helber functions
+let ID = () => {return Math.random().toString(36).substr(2, 9)}
+
 class Point {
-	constructor(public x: number, public y: number) { }
+	constructor(public x: number, public y: number, public id = ID()) { }
 
 	toDXF(): string {
 		return `
@@ -15,7 +18,7 @@ ${this.y}`;
 }
 
 class Line {
-	constructor(public x1: number, public y1: number, public x2: number, public y2: number) { }
+	constructor(public x1: number, public y1: number, public x2: number, public y2: number, public id = ID()) { }
 
 	toDXF(): string {
 		return `
@@ -35,7 +38,7 @@ ${this.y2}`;
 }
 
 class Circle {
-	constructor(public centerX: number, public centerY: number, public radius: number) { }
+	constructor(public centerX: number, public centerY: number, public radius: number, public id = ID()) { }
 
 	toDXF(): string {
 		return `
@@ -53,7 +56,7 @@ ${this.radius}`;
 }
 
 class Arc {
-	constructor(public centerX: number, public centerY: number, public radius: number, public startAngle: number, public endAngle: number) { }
+	constructor(public centerX: number, public centerY: number, public radius: number, public startAngle: number, public endAngle: number, public id = ID()) { }
 
 	toDXF(): string {
 		return `
@@ -75,7 +78,7 @@ ${this.endAngle}`;
 }
 
 class Rectangle {
-	constructor(public x: number, public y: number, public width: number, public height: number) { }
+	constructor(public x: number, public y: number, public width: number, public height: number, public id = ID()) { }
 
 	toDXF(): string {
 		const x1 = this.x;
@@ -97,7 +100,7 @@ class Rectangle {
 }
 
 class Polygon {
-	constructor(public points: Point[]) { }
+	constructor(public points: Point[], public id = ID()) { }
 
 	toDXF(): string {
 		let dxfString = '';
@@ -121,7 +124,7 @@ class Polygon {
 }
 
 class LinearPattern {
-	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public xOffset: number, public yOffset: number, public count: number) { }
+	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public xOffset: number, public yOffset: number, public count: number, public id = ID()) { }
 
 	toDXF(): string {
 		let dxfString = '';
@@ -155,7 +158,7 @@ class LinearPattern {
 }
 
 class CircularPattern {
-	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public centerX: number, public centerY: number, public count: number, public angleIncrement: number) { }
+	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public centerX: number, public centerY: number, public count: number, public angleIncrement: number, public id = ID()) { }
 
 	toDXF(): string {
 		let dxfString = '';
@@ -210,7 +213,7 @@ class CircularPattern {
 }
 
 class Mirror {
-	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public mirrorAxis: 'x' | 'y', public mirrorPosition: number) { }
+	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public mirrorAxis: 'x' | 'y', public mirrorPosition: number, public id = ID()) { }
 
 	toDXF(): string {
 		let dxfString = '';
@@ -335,57 +338,97 @@ EOF`;
 	}
 }
 
-export { Line, Circle, Point, Arc, Rectangle, Polygon, LinearPattern, CircularPattern, Mirror, DXFDocument };
+class DXF_MAKER {
+	private static DXFDocument: DXFDocument;
+	private static Shapes: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[];
+	constructor() {
+		let that = DXF_MAKER;
+		that.DXFDocument = new DXFDocument()
+		that.Shapes = [];
+	}
 
-// Document
-// const dxfDocument = new DXFDocument();
+	static addShape(shape: Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror): void {
+		let that = DXF_MAKER;
+		that.Shapes.push(shape);
+		that.bindShapesWithDocument();
+	}
 
-// Shapes
-/**
- * const line = new Line(0, 0, 100, 100);
- * const circle = new Circle(50, 50, 25);
- * const point = new Point(10, 10);
- * const arc = new Arc(50, 50, 25, 0, 180);
- * const rectangle = new Rectangle(0, 0, 100, 100);
- * const polygon = new Polygon([new Point(0, 0), new Point(100, 0), new Point(100, 100), new Point(0, 100)]);
- * const linearPattern = new LinearPattern([line, circle, arc, rectangle, point, polygon], 100, 100, 5);
- * const circularPattern = new CircularPattern([line, circle, arc, rectangle, point, polygon], 50, 50, 5, 2);
- * const mirror = new Mirror([line, circle, arc, rectangle, point, polygon], 'x', 50);
- */
+	static getShapes(): (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[] {
+		let that = DXF_MAKER;
+		return that.Shapes;
+	}
 
-// Add shapes to document
-/**
- * dxfDocument.addShape(line);
- * dxfDocument.addShape(circle);
- * dxfDocument.addShape(point);
- * dxfDocument.addShape(arc);
- * dxfDocument.addShape(rectangle);
- * dxfDocument.addShape(polygon);
- * dxfDocument.addShape(linearPattern);
- * dxfDocument.addShape(circularPattern);
- * dxfDocument.addShape(mirror);
- */
-
-// Generate DXF string
-/**
- * const dxfString = dxfDocument.generateDXF();
- * console.log(dxfString);
- */
-
-// Output as file (download)
-/**
- * const blob = new Blob([dxfString], { type: 'text/plain' });
- * const url = URL.createObjectURL(blob);
- * const a = document.createElement('a');
- * a.href = url;
- * a.download = 'example.dxf';
- * a.click();
- * URL.revokeObjectURL(url);
- */
+	static deleteShape(id: string): void {
+		let that = DXF_MAKER;
+		that.Shapes = that.Shapes.filter(shape => shape.id !== id);
+	}
 
 
-// Output as file (server)
-/**
- * const fs = require('fs');
- * fs.writeFileSync('example.dxf', dxfString);
- */
+	private static bindShapesWithDocument(): void {
+		let that = DXF_MAKER;
+		that.DXFDocument = new DXFDocument();
+		that.Shapes.forEach(shape => that.DXFDocument.addShape(shape));
+	}
+	
+	static clearShapes(): void {
+		let that = DXF_MAKER;
+		that.DXFDocument = new DXFDocument();
+		that.Shapes = [];
+	}
+
+	// shapes adder
+	static addLine(x1: number, y1: number, x2: number, y2: number): void {
+		let that = DXF_MAKER;
+		that.DXFDocument.addShape(new Line(x1, y1, x2, y2));
+	}
+
+	static addCircle(centerX: number, centerY: number, radius: number): void {
+		let that = DXF_MAKER;
+		that.DXFDocument.addShape(new Circle(centerX, centerY, radius));
+	}
+
+	static addArc(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number): void {
+		let that = DXF_MAKER;
+		that.DXFDocument.addShape(new Arc(centerX, centerY, radius, startAngle, endAngle));
+	}
+
+	static addRectangle(x: number, y: number, width: number, height: number): void {
+		let that = DXF_MAKER;
+		that.DXFDocument.addShape(new Rectangle(x, y, width, height));
+	}
+
+	static addPoint(x: number, y: number): void {
+		let that = DXF_MAKER;
+		that.DXFDocument.addShape(new Point(x, y));
+	}
+
+	static addPolygon(points: Point[]): void {
+		let that = DXF_MAKER;
+		that.DXFDocument.addShape(new Polygon(points));
+	}
+
+	// patterns adder
+	static addLinearPattern(entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], xOffset: number, yOffset: number, count: number): void {
+		let that = DXF_MAKER;
+		that.DXFDocument.addShape(new LinearPattern(entities, xOffset, yOffset, count));
+	}
+
+	static addCircularPattern(entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], centerX: number, centerY: number, count: number, angleIncrement: number): void {
+		let that = DXF_MAKER;
+		that.DXFDocument.addShape(new CircularPattern(entities, centerX, centerY, count, angleIncrement));
+	}
+
+	// mirror adder
+	static addMirror(entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], mirrorAxis: 'x' | 'y', mirrorPosition: number): void {
+		let that = DXF_MAKER;
+		that.DXFDocument.addShape(new Mirror(entities, mirrorAxis, mirrorPosition));
+	}
+
+	// generate dxf
+	static generateDXF(): string {
+		let that = DXF_MAKER;
+		return that.DXFDocument.generateDXF();
+	}
+}
+
+export default DXF_MAKER;
