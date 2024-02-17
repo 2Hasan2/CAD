@@ -338,39 +338,54 @@ EOF`;
 export { Line, Circle, Point, Arc, Rectangle, Polygon, LinearPattern, CircularPattern, Mirror, DXFDocument };
 
 // Document
-const dxfDocument = new DXFDocument();
+// const dxfDocument = new DXFDocument();
 
 // Shapes
-const line = new Line(0, 0, 100, 100);
-const circle = new Circle(0, 0, 50);
-const point = new Point(0, 0);
-const arc = new Arc(0, 0, 50, 0, 90);
-const rectangle = new Rectangle(0, 0, 100, 100);
-const polygon = new Polygon([new Point(0, 0), new Point(100, 0), new Point(100, 100), new Point(0, 100)]);
-const linearPattern = new LinearPattern([line, circle, arc, rectangle, point, polygon], 100, 100, 3);
-const circularPattern = new CircularPattern([line, circle, arc, rectangle, point, polygon], 0, 0, 3, 1);
-const mirror = new Mirror([line, circle, arc, rectangle, point, polygon], 'x', 0);
+/**
+ * const line = new Line(0, 0, 100, 100);
+ * const circle = new Circle(50, 50, 25);
+ * const point = new Point(10, 10);
+ * const arc = new Arc(50, 50, 25, 0, 180);
+ * const rectangle = new Rectangle(0, 0, 100, 100);
+ * const polygon = new Polygon([new Point(0, 0), new Point(100, 0), new Point(100, 100), new Point(0, 100)]);
+ * const linearPattern = new LinearPattern([line, circle, arc, rectangle, point, polygon], 100, 100, 5);
+ * const circularPattern = new CircularPattern([line, circle, arc, rectangle, point, polygon], 50, 50, 5, 2);
+ * const mirror = new Mirror([line, circle, arc, rectangle, point, polygon], 'x', 50);
+ */
 
 // Add shapes to document
-dxfDocument.addShape(line);
-dxfDocument.addShape(circle);
-dxfDocument.addShape(point);
-dxfDocument.addShape(arc);
-dxfDocument.addShape(rectangle);
-dxfDocument.addShape(polygon);
-dxfDocument.addShape(linearPattern);
-dxfDocument.addShape(circularPattern);
-dxfDocument.addShape(mirror);
+/**
+ * dxfDocument.addShape(line);
+ * dxfDocument.addShape(circle);
+ * dxfDocument.addShape(point);
+ * dxfDocument.addShape(arc);
+ * dxfDocument.addShape(rectangle);
+ * dxfDocument.addShape(polygon);
+ * dxfDocument.addShape(linearPattern);
+ * dxfDocument.addShape(circularPattern);
+ * dxfDocument.addShape(mirror);
+ */
 
-// Generate DXF
-const dxfString = dxfDocument.generateDXF();
-console.log(dxfString);
+// Generate DXF string
+/**
+ * const dxfString = dxfDocument.generateDXF();
+ * console.log(dxfString);
+ */
 
-// Output as downloadeable file
-const blob = new Blob([dxfString], { type: 'text/plain' });
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url;
-a.download = 'example.dxf';
-a.click();
-URL.revokeObjectURL(url);
+// Output as file (download)
+/**
+ * const blob = new Blob([dxfString], { type: 'text/plain' });
+ * const url = URL.createObjectURL(blob);
+ * const a = document.createElement('a');
+ * a.href = url;
+ * a.download = 'example.dxf';
+ * a.click();
+ * URL.revokeObjectURL(url);
+ */
+
+
+// Output as file (server)
+/**
+ * const fs = require('fs');
+ * fs.writeFileSync('example.dxf', dxfString);
+ */
