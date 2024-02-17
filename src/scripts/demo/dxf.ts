@@ -264,32 +264,32 @@ class Mirror {
 	}
 }
 
-class Group {
-	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[]) { }
+// class Group {
+// 	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[]) { }
 
-	toDXF(): string {
-		let dxfString = `
-0
-INSERT
-8
-0`;
+// 	toDXF(): string {
+// 		let dxfString = `
+// 0
+// INSERT
+// 8
+// 0`;
 
-		this.entities.forEach(entity => {
-			dxfString += `
-2
-${entity.constructor.name.toUpperCase()}`;
-			if (!(entity instanceof Mirror)) {
-				dxfString += `
-10
-${entity instanceof Point ? entity.x : (entity as Line).x1}
-20
-${entity instanceof Point ? entity.y : (entity as Line).y1}`;
-			}
-		});
+// 		this.entities.forEach(entity => {
+// 			dxfString += `
+// 2
+// ${entity.constructor.name.toUpperCase()}`;
+// 			if (!(entity instanceof Mirror)) {
+// 				dxfString += `
+// 10
+// ${entity instanceof Point ? entity.x : (entity as Line).x1}
+// 20
+// ${entity instanceof Point ? entity.y : (entity as Line).y1}`;
+// 			}
+// 		});
 
-		return dxfString;
-	}
-}
+// 		return dxfString;
+// 	}
+// }
 
 class DXFDocument {
 	private entities: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror | Group)[] = [];
@@ -360,7 +360,7 @@ const shapes = [arc, rectangle, polygon,]
 const mirrorX = new Mirror(shapes, 'x', 0);
 const mirrorY = new Mirror(shapes, 'y', 0);
 
-const group = new Group([line, circle, point, arc, rectangle, polygon]);
+// const group = new Group([line, circle, point, arc, rectangle, polygon]);
 
 const dxfDoc = new DXFDocument();
 //* dxfDoc.addShape(circle); test is done
@@ -373,7 +373,6 @@ const dxfDoc = new DXFDocument();
 //* dxfDoc.addShape(circularPattern); test is done
 //* dxfDoc.addShape(mirrorY);  test is done
 //* dxfDoc.addShape(mirrorY);  test is done
-dxfDoc.addShape(group);
 
 const dxfContent = dxfDoc.generateDXF();
 
