@@ -359,7 +359,7 @@ const polygon = new Polygon([
 ]);
 
 const linearPattern = new LinearPattern([line, circle], 20, 20, 10);
-const circularPattern = new CircularPattern([polygon], 0, 0, 5, 1);
+const circularPattern = new CircularPattern([point], 0, 0, 5, 1);
 const mirrorX = new Mirror([line, circle], 'x', 0);
 const mirrorY = new Mirror([line, circle], 'y', 0);
 
