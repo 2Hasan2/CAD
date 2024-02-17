@@ -324,11 +324,7 @@ SECTION
 ENTITIES`;
 
 		this.entities.forEach(entity => {
-			if (entity instanceof Group) {
 				dxfString += entity.toDXF();
-			} else {
-				dxfString += entity.toDXF();
-			}
 		});
 
 		dxfString += `
