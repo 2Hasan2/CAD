@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+
 class Point {
 	constructor(public x: number, public y: number) { }
 
@@ -11,8 +12,7 @@ POINT
 10
 ${this.x}
 20
-${this.y}
-0`;
+${this.y}`;
 	}
 }
 
@@ -32,8 +32,7 @@ ${this.y1}
 11
 ${this.x2}
 21
-${this.y2}
-0`;
+${this.y2}`;
 	}
 }
 
@@ -51,8 +50,7 @@ ${this.centerX}
 20
 ${this.centerY}
 40
-${this.radius}
-0`;
+${this.radius}`;
 	}
 }
 
@@ -74,8 +72,7 @@ ${this.radius}
 50
 ${this.startAngle}
 51
-${this.endAngle}
-0`;
+${this.endAngle}`;
 	}
 }
 
@@ -186,13 +183,14 @@ class CircularPattern {
 			const y2 = centerY + (entity.x2 - centerX) * sinAngle + (entity.y2 - centerY) * cosAngle;
 			return new Line(x1, y1, x2, y2);
 		} else if (entity instanceof Circle) {
-			// Not supported in circular pattern
-			return entity;
+			const x = centerX + (entity.centerX - centerX) * cosAngle - (entity.centerY - centerY) * sinAngle;
+			const y = centerY + (entity.centerX - centerX) * sinAngle + (entity.centerY - centerY) * cosAngle;
+			return new Circle(x, y, entity.radius);
 		} else if (entity instanceof Arc) {
-			// Not supported in circular pattern
+			// coming soon
 			return entity;
 		} else if (entity instanceof Rectangle) {
-			// Not supported in circular pattern
+			// coming soon
 			return entity;
 		} else if (entity instanceof Point) {
 			const x = centerX + (entity.x - centerX) * cosAngle - (entity.y - centerY) * sinAngle;
@@ -230,10 +228,10 @@ class Mirror {
 			} else if (entity instanceof Circle) {
 				return new Circle(entity.centerX, 2 * mirrorPosition - entity.centerY, entity.radius);
 			} else if (entity instanceof Arc) {
-				// Not supported in mirror operation
+				// coming soon
 				return entity;
 			} else if (entity instanceof Rectangle) {
-				// Not supported in mirror operation
+				// coming soon
 				return entity;
 			} else if (entity instanceof Point) {
 				return new Point(entity.x, 2 * mirrorPosition - entity.y);
@@ -249,10 +247,10 @@ class Mirror {
 			} else if (entity instanceof Circle) {
 				return new Circle(2 * mirrorPosition - entity.centerX, entity.centerY, entity.radius);
 			} else if (entity instanceof Arc) {
-				// Not supported in mirror operation
+				// coming soon
 				return entity;
 			} else if (entity instanceof Rectangle) {
-				// Not supported in mirror operation
+				// coming soon
 				return entity;
 			} else if (entity instanceof Point) {
 				return new Point(2 * mirrorPosition - entity.x, entity.y);
@@ -272,25 +270,26 @@ class Group {
 	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[]) { }
 
 	toDXF(): string {
-				let dxfString = `
-		0
-		INSERT
-		8
-		0
-		`;
-				this.entities.forEach(entity => {
-					dxfString += `
-		2
-		${entity.constructor.name.toUpperCase()}
-		10
-		${entity instanceof Mirror ? 0 : (entity as Point).x ?? 0}
-		20
-		${entity instanceof Mirror ? 0 : (entity as Point).y ?? 0}
-		`;
-				});
-
-		return dxfString + `
+		let dxfString = `
+0
+INSERT
+8
 0`;
+
+		this.entities.forEach(entity => {
+			dxfString += `
+2
+${entity.constructor.name.toUpperCase()}`;
+			if (!(entity instanceof Mirror)) {
+				dxfString += `
+10
+${entity instanceof Point ? entity.x : (entity as Line).x1}
+20
+${entity instanceof Point ? entity.y : (entity as Line).y1}`;
+			}
+		});
+
+		return dxfString;
 	}
 }
 
@@ -346,7 +345,7 @@ EOF`;
 
 // Usage example:
 const line = new Line(0, 0, 30, 70);
-const circle = new Circle(50, 50, 25);
+const circle = new Circle(30, 70, 25);
 const point = new Point(10, 20);
 const arc = new Arc(75, 75, 50, 45, 135);
 const rectangle = new Rectangle(100, 100, 50, 30);
@@ -357,15 +356,25 @@ const polygon = new Polygon([
 	new Point(250, 150),
 ]);
 
-const linearPattern = new LinearPattern([line, circle], 20, 20, 3);
+const linearPattern = new LinearPattern([line, circle], 20, 20, 10);
 const circularPattern = new CircularPattern([line, circle], 0, 0, 5, 1);
 const mirrorX = new Mirror([line, circle], 'x', 0);
 const mirrorY = new Mirror([line, circle], 'y', 0);
 
-const group = new Group([line, circle, point, arc, rectangle, polygon, linearPattern, circularPattern, mirrorX, mirrorY]);
+// const group = new Group([line, circle, point, arc, rectangle, polygon, linearPattern, circularPattern, mirrorX, mirrorY]);
 
 const dxfDoc = new DXFDocument();
-dxfDoc.addShape(group);
+//* dxfDoc.addShape(circle); test is done
+//* dxfDoc.addShape(line); test is done
+//* dxfDoc.addShape(point); test is done
+//* dxfDoc.addShape(arc); test is done
+//* dxfDoc.addShape(rectangle); test is done
+//* dxfDoc.addShape(polygon); test is done
+//* dxfDoc.addShape(linearPattern); test is done
+dxfDoc.addShape(circularPattern);
+//? dxfDoc.addShape(mirrorX); 
+//? dxfDoc.addShape(mirrorY);
+//? dxfDoc.addShape(group);
 
 const dxfContent = dxfDoc.generateDXF();
 
