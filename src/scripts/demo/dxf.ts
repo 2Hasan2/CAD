@@ -191,8 +191,9 @@ class CircularPattern {
 			const y = centerY + (entity.centerX - centerX) * sinAngle + (entity.centerY - centerY) * cosAngle;
 			return new Arc(x, y, entity.radius, entity.startAngle, entity.endAngle);
 		} else if (entity instanceof Rectangle) {
-			// coming soon
-			return entity;
+			const x = centerX + (entity.x - centerX) * cosAngle - (entity.y - centerY) * sinAngle;
+			const y = centerY + (entity.x - centerX) * sinAngle + (entity.y - centerY) * cosAngle;
+			return new Rectangle(x, y, entity.width, entity.height);
 		} else if (entity instanceof Point) {
 			const x = centerX + (entity.x - centerX) * cosAngle - (entity.y - centerY) * sinAngle;
 			const y = centerY + (entity.x - centerX) * sinAngle + (entity.y - centerY) * cosAngle;
@@ -358,7 +359,7 @@ const polygon = new Polygon([
 ]);
 
 const linearPattern = new LinearPattern([line, circle], 20, 20, 10);
-const circularPattern = new CircularPattern([line, point], 0, 0, 5, 1);
+const circularPattern = new CircularPattern([rectangle], 0, 0, 5, 1);
 const mirrorX = new Mirror([line, circle], 'x', 0);
 const mirrorY = new Mirror([line, circle], 'y', 0);
 
@@ -372,7 +373,7 @@ const dxfDoc = new DXFDocument();
 //* dxfDoc.addShape(rectangle); test is done
 //* dxfDoc.addShape(polygon); test is done
 //* dxfDoc.addShape(linearPattern); test is done
-dxfDoc.addShape(circularPattern); //? test is done in [ Circle , Line , arc ,point ]
+dxfDoc.addShape(circularPattern); //? test is done in [ Circle , Line , arc ,point , rectangle ]
 //? dxfDoc.addShape(mirrorX); 
 //? dxfDoc.addShape(mirrorY);
 //? dxfDoc.addShape(group);
