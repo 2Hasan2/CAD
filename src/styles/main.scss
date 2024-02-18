@@ -44,9 +44,11 @@ body {
 }
 @import 'toolbar';
 
-
 canvas {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #f0f0f0;
   display: block;
 }
 // CAD STYLES

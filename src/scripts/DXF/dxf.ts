@@ -1,6 +1,4 @@
-//  helber functions
-let ID = () => {return Math.random().toString(36).substr(2, 9)}
-
+let ID = () => { return Math.random().toString(36).substr(2, 9) }
 class Point {
 	constructor(public x: number, public y: number, public id = ID()) { }
 
@@ -14,6 +12,13 @@ POINT
 ${this.x}
 20
 ${this.y}`;
+	}
+
+	toCTX(ctx: CanvasRenderingContext2D) {
+		ctx.beginPath();
+		ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+		ctx.fillStyle = 'black';
+		ctx.fill();
 	}
 }
 
@@ -35,6 +40,14 @@ ${this.x2}
 21
 ${this.y2}`;
 	}
+
+	toCTX(ctx: CanvasRenderingContext2D) {
+		ctx.beginPath();
+		ctx.moveTo(this.x1, this.y1);
+		ctx.lineTo(this.x2, this.y2);
+		ctx.strokeStyle = 'black';
+		ctx.stroke();
+	}
 }
 
 class Circle {
@@ -52,6 +65,13 @@ ${this.centerX}
 ${this.centerY}
 40
 ${this.radius}`;
+	}
+
+	toCTX(ctx: CanvasRenderingContext2D) {
+		ctx.beginPath();
+		ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2);
+		ctx.strokeStyle = 'black';
+		ctx.stroke();
 	}
 }
 
@@ -75,6 +95,13 @@ ${this.startAngle}
 51
 ${this.endAngle}`;
 	}
+
+	toCTX(ctx: CanvasRenderingContext2D) {
+		ctx.beginPath();
+		ctx.arc(this.centerX, this.centerY, this.radius, this.startAngle, this.endAngle);
+		ctx.strokeStyle = 'black';
+		ctx.stroke();
+	}
 }
 
 class Rectangle {
@@ -96,6 +123,13 @@ class Rectangle {
 		const line4 = new Line(x4, y4, x1, y1).toDXF();
 
 		return line1 + line2 + line3 + line4;
+	}
+
+	toCTX(ctx: CanvasRenderingContext2D) {
+		ctx.beginPath();
+		ctx.rect(this.x, this.y, this.width, this.height);
+		ctx.strokeStyle = 'black';
+		ctx.stroke();
 	}
 }
 
@@ -120,6 +154,17 @@ class Polygon {
 		dxfString += lastLine;
 
 		return dxfString;
+	}
+
+	toCTX(ctx: CanvasRenderingContext2D) {
+		ctx.beginPath();
+		ctx.moveTo(this.points[0].x, this.points[0].y);
+		for (let i = 1; i < this.points.length; i++) {
+			ctx.lineTo(this.points[i].x, this.points[i].y);
+		}
+		ctx.closePath();
+		ctx.strokeStyle = 'black';
+		ctx.stroke();
 	}
 }
 
@@ -154,6 +199,10 @@ class LinearPattern {
 		} else {
 			throw new Error('Unsupported entity type');
 		}
+	}
+
+	toCTX(ctx: CanvasRenderingContext2D) {
+		this.entities.forEach(entity => entity.toCTX(ctx));
 	}
 }
 
@@ -210,6 +259,10 @@ class CircularPattern {
 			throw new Error('Unsupported entity type');
 		}
 	}
+
+	toCTX(ctx: CanvasRenderingContext2D) {
+		this.entities.forEach(entity => entity.toCTX(ctx));
+	}
 }
 
 class Mirror {
@@ -263,37 +316,14 @@ class Mirror {
 			throw new Error('Invalid mirror axis');
 		}
 	}
+
+	toCTX(ctx: CanvasRenderingContext2D) {
+		this.entities.forEach(entity => entity.toCTX(ctx));
+	}
 }
 
-// class Group {
-// 	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[]) { }
-
-// 	toDXF(): string {
-// 		let dxfString = `
-// 0
-// INSERT
-// 8
-// 0`;
-
-// 		this.entities.forEach(entity => {
-// 			dxfString += `
-// 2
-// ${entity.constructor.name.toUpperCase()}`;
-// 			if (!(entity instanceof Mirror)) {
-// 				dxfString += `
-// 10
-// ${entity instanceof Point ? entity.x : (entity as Line).x1}
-// 20
-// ${entity instanceof Point ? entity.y : (entity as Line).y1}`;
-// 			}
-// 		});
-
-// 		return dxfString;
-// 	}
-// }
-
 class DXFDocument {
-	private entities: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror )[] = [];
+	private entities: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[] = [];
 
 	addShape(shape: Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror): void {
 		this.entities.push(shape);
@@ -325,7 +355,7 @@ SECTION
 ENTITIES`;
 
 		this.entities.forEach(entity => {
-				dxfString += entity.toDXF();
+			dxfString += entity.toDXF();
 		});
 
 		dxfString += `
@@ -335,6 +365,10 @@ ENDSEC
 EOF`;
 
 		return dxfString;
+	}
+
+	toCTX(ctx: CanvasRenderingContext2D) {
+		this.entities.forEach(entity => entity.toCTX(ctx));
 	}
 }
 
@@ -369,7 +403,7 @@ class DXF_MAKER {
 		that.DXFDocument = new DXFDocument();
 		that.Shapes.forEach(shape => that.DXFDocument.addShape(shape));
 	}
-	
+
 	static clearShapes(): void {
 		let that = DXF_MAKER;
 		that.DXFDocument = new DXFDocument();
@@ -429,6 +463,12 @@ class DXF_MAKER {
 		let that = DXF_MAKER;
 		return that.DXFDocument.generateDXF();
 	}
+
+	static toCTX(ctx: CanvasRenderingContext2D) {
+		this.Shapes.forEach(shape => shape.toCTX(ctx));
+	}
 }
 
 export default DXF_MAKER;
+
+export { Point, Line, Circle, Arc, Rectangle, Polygon, LinearPattern, CircularPattern, Mirror, DXFDocument };
