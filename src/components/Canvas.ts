@@ -1,5 +1,3 @@
-import {Line, Circle, entity} from "../scripts/DXF/dxf";
-
 class InfiniteCanvas {
 	private canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
@@ -9,7 +7,6 @@ class InfiniteCanvas {
 	private mouseX: number;
 	private mouseY: number;
 	private isMouseDown: boolean;
-	private Draws : entity[];
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.canvas = canvas;
@@ -20,15 +17,11 @@ class InfiniteCanvas {
 		this.mouseX = 0;
 		this.mouseY = 0;
 		this.isMouseDown = false;
-		this.Draws = [];
 		this.init();
 		this.render();
-		// usage of line 
-		let line = new Line(...this.PosToCanvas(0,0), ...this.PosToCanvas(50,50))
-		let circle = new Circle(...this.PosToCanvas(0,0), 50)
-		circle.toCTX(this.ctx)
-		line.toCTX(this.ctx)
 	}
+
+
 
 	private init() {
 		this.canvas.width = window.innerWidth;
@@ -48,9 +41,11 @@ class InfiniteCanvas {
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		this.drawGrid();
 		this.drawAxes();
-		this.renderEntity();
 	}
 
+
+
+	// no no no -- fix this part to make it more reusable
 	public PosToCanvas(x:number, y:number):[number, number]{
 		let up = this.canvas.height / 2 + this.offsetY
 		let left = this.canvas.width / 2 + this.offsetX
@@ -94,6 +89,8 @@ class InfiniteCanvas {
 	}
 
 
+
+	// mouse handling events
 	private handleMouseDown(event: MouseEvent) {
 		this.isMouseDown = true;
 		this.mouseX = event.clientX;
@@ -130,18 +127,12 @@ class InfiniteCanvas {
 	}
 
 
+	// helper functions
 	public getMousePosition(event: MouseEvent): [number, number] {
 		const rect = this.canvas.getBoundingClientRect();
 		const mouseX = (event.clientX - rect.left - this.canvas.width / 2 - this.offsetX)
 		const mouseY = -(event.clientY - rect.top - this.canvas.height / 2 - this.offsetY)
 		return [mouseX, mouseY];
-	}
-
-
-
-	// draw entity handler
-	private renderEntity(){
-		this.Draws.forEach((entity)=>entity.toCTX(this.ctx))
 	}
 }
 

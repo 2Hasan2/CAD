@@ -1,12 +1,14 @@
 let ID = () => { return Math.random().toString(36).substr(2, 9) }
 interface entity {
 	id: string;
+	type: string;
 	toDXF() : string;
 	toCTX(ctx: CanvasRenderingContext2D): void;
+	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void;
 }
 
 class Point implements entity {
-	constructor(public x: number, public y: number, public id = ID()) { }
+	constructor(public x: number, public y: number, public id = ID(), public type = "point") { }
 
 	toDXF(): string {
 		return `
@@ -26,10 +28,15 @@ ${this.y}`;
 		ctx.fillStyle = 'black';
 		ctx.fill();
 	}
+
+	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
+		this.x += left; this.y = -this.y + up; 
+		this.toCTX(ctx)
+	}
 }
 
 class Line implements entity {
-	constructor(public x1: number, public y1: number, public x2: number, public y2: number, public id = ID()) { }
+	constructor(public x1: number, public y1: number, public x2: number, public y2: number, public id = ID(), public type = "line") { }
 
 	toDXF(): string {
 		return `
@@ -54,10 +61,16 @@ ${this.y2}`;
 		ctx.strokeStyle = 'black';
 		ctx.stroke();
 	}
+
+	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
+		this.x1 += left; this.y1 = -(this.y1 + up)
+		this.x2 += left; this.y2 = -(this.y2 + up)
+		this.toCTX(ctx)
+	}
 }
 
 class Circle implements entity {
-	constructor(public centerX: number, public centerY: number, public radius: number, public id = ID()) { }
+	constructor(public centerX: number, public centerY: number, public radius: number, public id = ID(), public type = "circle") { }
 
 	toDXF(): string {
 		return `
@@ -79,10 +92,15 @@ ${this.radius}`;
 		ctx.strokeStyle = 'black';
 		ctx.stroke();
 	}
+	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
+		this.centerX = left;
+		this.centerY = -this.centerY + up;
+		this.toCTX(ctx);
+	}
 }
 
 class Arc implements entity {
-	constructor(public centerX: number, public centerY: number, public radius: number, public startAngle: number, public endAngle: number, public id = ID()) { }
+	constructor(public centerX: number, public centerY: number, public radius: number, public startAngle: number, public endAngle: number, public id = ID(), public type = "arc") { }
 
 	toDXF(): string {
 		return `
@@ -108,10 +126,13 @@ ${this.endAngle}`;
 		ctx.strokeStyle = 'black';
 		ctx.stroke();
 	}
+	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
+		
+	}
 }
 
 class Rectangle implements entity {
-	constructor(public x: number, public y: number, public width: number, public height: number, public id = ID()) { }
+	constructor(public x: number, public y: number, public width: number, public height: number, public id = ID(), public type ="rectangle") { }
 
 	toDXF(): string {
 		const x1 = this.x;
@@ -137,10 +158,15 @@ class Rectangle implements entity {
 		ctx.strokeStyle = 'black';
 		ctx.stroke();
 	}
+
+	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
+		
+	}
+
 }
 
 class Polygon implements entity {
-	constructor(public points: Point[], public id = ID()) { }
+	constructor(public points: Point[], public id = ID(), public type = "polygon") { }
 
 	toDXF(): string {
 		let dxfString = '';
@@ -172,10 +198,13 @@ class Polygon implements entity {
 		ctx.strokeStyle = 'black';
 		ctx.stroke();
 	}
+	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
+		
+	}
 }
 
 class LinearPattern implements entity {
-	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public xOffset: number, public yOffset: number, public count: number, public id = ID()) { }
+	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public xOffset: number, public yOffset: number, public count: number, public id = ID(), public type = "linear") { }
 
 	toDXF(): string {
 		let dxfString = '';
@@ -210,10 +239,13 @@ class LinearPattern implements entity {
 	toCTX(ctx: CanvasRenderingContext2D) {
 		this.entities.forEach(entity => entity.toCTX(ctx));
 	}
+	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
+		
+	}
 }
 
 class CircularPattern implements entity {
-	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public centerX: number, public centerY: number, public count: number, public angleIncrement: number, public id = ID()) { }
+	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public centerX: number, public centerY: number, public count: number, public angleIncrement: number, public id = ID(), public type = "circular") { }
 
 	toDXF(): string {
 		let dxfString = '';
@@ -269,10 +301,13 @@ class CircularPattern implements entity {
 	toCTX(ctx: CanvasRenderingContext2D) {
 		this.entities.forEach(entity => entity.toCTX(ctx));
 	}
+	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
+		
+	}
 }
 
 class Mirror implements entity {
-	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public mirrorAxis: 'x' | 'y', public mirrorPosition: number, public id = ID()) { }
+	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public mirrorAxis: 'x' | 'y', public mirrorPosition: number, public id = ID(), public type = "mirror") { }
 
 	toDXF(): string {
 		let dxfString = '';
@@ -325,6 +360,9 @@ class Mirror implements entity {
 
 	toCTX(ctx: CanvasRenderingContext2D) {
 		this.entities.forEach(entity => entity.toCTX(ctx));
+	}
+	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
+		
 	}
 }
 
