@@ -1,5 +1,11 @@
 let ID = () => { return Math.random().toString(36).substr(2, 9) }
-class Point {
+interface entity {
+	id: string;
+	toDXF() : string;
+	toCTX(ctx: CanvasRenderingContext2D): void;
+}
+
+class Point implements entity {
 	constructor(public x: number, public y: number, public id = ID()) { }
 
 	toDXF(): string {
@@ -22,7 +28,7 @@ ${this.y}`;
 	}
 }
 
-class Line {
+class Line implements entity {
 	constructor(public x1: number, public y1: number, public x2: number, public y2: number, public id = ID()) { }
 
 	toDXF(): string {
@@ -50,7 +56,7 @@ ${this.y2}`;
 	}
 }
 
-class Circle {
+class Circle implements entity {
 	constructor(public centerX: number, public centerY: number, public radius: number, public id = ID()) { }
 
 	toDXF(): string {
@@ -75,7 +81,7 @@ ${this.radius}`;
 	}
 }
 
-class Arc {
+class Arc implements entity {
 	constructor(public centerX: number, public centerY: number, public radius: number, public startAngle: number, public endAngle: number, public id = ID()) { }
 
 	toDXF(): string {
@@ -104,7 +110,7 @@ ${this.endAngle}`;
 	}
 }
 
-class Rectangle {
+class Rectangle implements entity {
 	constructor(public x: number, public y: number, public width: number, public height: number, public id = ID()) { }
 
 	toDXF(): string {
@@ -133,7 +139,7 @@ class Rectangle {
 	}
 }
 
-class Polygon {
+class Polygon implements entity {
 	constructor(public points: Point[], public id = ID()) { }
 
 	toDXF(): string {
@@ -168,7 +174,7 @@ class Polygon {
 	}
 }
 
-class LinearPattern {
+class LinearPattern implements entity {
 	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public xOffset: number, public yOffset: number, public count: number, public id = ID()) { }
 
 	toDXF(): string {
@@ -206,7 +212,7 @@ class LinearPattern {
 	}
 }
 
-class CircularPattern {
+class CircularPattern implements entity {
 	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public centerX: number, public centerY: number, public count: number, public angleIncrement: number, public id = ID()) { }
 
 	toDXF(): string {
@@ -265,7 +271,7 @@ class CircularPattern {
 	}
 }
 
-class Mirror {
+class Mirror implements entity {
 	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public mirrorAxis: 'x' | 'y', public mirrorPosition: number, public id = ID()) { }
 
 	toDXF(): string {
@@ -471,4 +477,4 @@ class DXF_MAKER {
 
 export default DXF_MAKER;
 
-export { Point, Line, Circle, Arc, Rectangle, Polygon, LinearPattern, CircularPattern, Mirror, DXFDocument };
+export { entity, Point, Line, Circle, Arc, Rectangle, Polygon, LinearPattern, CircularPattern, Mirror, DXFDocument };

@@ -1,3 +1,5 @@
+import {Line, Circle, entity} from "../scripts/DXF/dxf";
+
 class InfiniteCanvas {
 	private canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
@@ -7,8 +9,7 @@ class InfiniteCanvas {
 	private mouseX: number;
 	private mouseY: number;
 	private isMouseDown: boolean;
-	private isDrawing: boolean;
-	private ClickedOn: [number, number][]
+	private Draws : entity[];
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.canvas = canvas;
@@ -19,10 +20,14 @@ class InfiniteCanvas {
 		this.mouseX = 0;
 		this.mouseY = 0;
 		this.isMouseDown = false;
-		this.isDrawing = true;
-		this.ClickedOn = []
+		this.Draws = [];
 		this.init();
 		this.render();
+		// usage of line 
+		let line = new Line(...this.PosToCanvas(0,0), ...this.PosToCanvas(50,50))
+		let circle = new Circle(...this.PosToCanvas(0,0), 50)
+		circle.toCTX(this.ctx)
+		line.toCTX(this.ctx)
 	}
 
 	private init() {
@@ -43,6 +48,7 @@ class InfiniteCanvas {
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		this.drawGrid();
 		this.drawAxes();
+		this.renderEntity();
 	}
 
 	public PosToCanvas(x:number, y:number):[number, number]{
@@ -92,18 +98,10 @@ class InfiniteCanvas {
 		this.isMouseDown = true;
 		this.mouseX = event.clientX;
 		this.mouseY = event.clientY;
-		if (this.isDrawing) {
-			this.ClickedOn.unshift(this.getMousePosition(event))
-			if (this.ClickedOn.length == 2) {
-				console.log(this.ClickedOn);
-				// draw
-				this.ClickedOn.length = 0
-			}
-		}
 	}
 
 	private handleMouseMove(event: MouseEvent) {
-		if (this.isMouseDown && !this.isDrawing) {
+		if (this.isMouseDown) {
 			const deltaX = event.clientX - this.mouseX;
 			const deltaY = event.clientY - this.mouseY;
 			this.offsetX += deltaX;
@@ -129,8 +127,6 @@ class InfiniteCanvas {
 		}
 		this.render();
 		event.preventDefault();
-		console.log(this.scale);
-		
 	}
 
 
@@ -141,9 +137,11 @@ class InfiniteCanvas {
 		return [mouseX, mouseY];
 	}
 
-	// draw method
-	public StartDrawing() {
-		this.isDrawing = true
+
+
+	// draw entity handler
+	private renderEntity(){
+		this.Draws.forEach((entity)=>entity.toCTX(this.ctx))
 	}
 }
 
