@@ -1,15 +1,21 @@
 let ID = () => { return Math.random().toString(36).substr(2, 9) }
 interface entity {
-	id: string;
-	type: string;
+	start: { x: number, y: number };
+	end?: { x: number, y: number };
+	radius?: number;
+	ctx: CanvasRenderingContext2D;
 	toDXF() : string;
-	toCTX(ctx: CanvasRenderingContext2D): void;
-	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void;
+	toCTX(): void;
 }
 
-class Point implements entity {
-	constructor(public x: number, public y: number, public id = ID(), public type = "point") { }
-
+class Point {
+	id : string;
+	type: string;
+	constructor(public x: number, public y: number, public ctx: CanvasRenderingContext2D) {
+		this.id = ID();
+		this.type = "point";
+		this.ctx = ctx;
+	}
 	toDXF(): string {
 		return `
 0
@@ -22,21 +28,22 @@ ${this.x}
 ${this.y}`;
 	}
 
-	toCTX(ctx: CanvasRenderingContext2D) {
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
-		ctx.fillStyle = 'black';
-		ctx.fill();
-	}
-
-	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
-		this.x += left; this.y = -this.y + up; 
-		this.toCTX(ctx)
+	toCTX() {
+		this.ctx.beginPath();
+		this.ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
+		this.ctx.fillStyle = 'black';
+		this.ctx.fill();
 	}
 }
-
 class Line implements entity {
-	constructor(public x1: number, public y1: number, public x2: number, public y2: number, public id = ID(), public type = "line") { }
+	id: string;
+	type: string;
+	ctx: CanvasRenderingContext2D;
+	constructor(public start: { x: number, y: number }, public end: { x: number, y: number }, ctx: CanvasRenderingContext2D) { 
+		this.id = ID();
+		this.type = "line";
+		this.ctx = ctx;
+	}
 
 	toDXF(): string {
 		return `
@@ -45,33 +52,37 @@ LINE
 8
 0
 10
-${this.x1}
+${this.start.x}
 20
-${this.y1}
+${this.start.y}
 11
-${this.x2}
+${this.end.x}
 21
-${this.y2}`;
+${this.end.y}`;
 	}
 
-	toCTX(ctx: CanvasRenderingContext2D) {
-		ctx.beginPath();
-		ctx.moveTo(this.x1, this.y1);
-		ctx.lineTo(this.x2, this.y2);
-		ctx.strokeStyle = 'black';
-		ctx.stroke();
+	toCTX() {
+		this.ctx.beginPath();
+		this.ctx.moveTo(this.start.x, this.start.y);
+		this.ctx.lineTo(this.end.x, this.end.y);
+		this.ctx.strokeStyle = 'black';
+		this.ctx.stroke();
 	}
 
-	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
-		this.x1 += left; this.y1 = -(this.y1 + up)
-		this.x2 += left; this.y2 = -(this.y2 + up)
-		this.toCTX(ctx)
-	}
 }
 
 class Circle implements entity {
-	constructor(public centerX: number, public centerY: number, public radius: number, public id = ID(), public type = "circle") { }
+	id: string;
+	type: string;
+	ctx: CanvasRenderingContext2D;
+	radius: number;
 
+	constructor(public start: { x: number, y: number }, radius: number, ctx: CanvasRenderingContext2D) {
+		this.id = ID();
+		this.type = "circle";
+		this.ctx = ctx;
+		this.radius = radius;
+	}
 	toDXF(): string {
 		return `
 0
@@ -79,29 +90,32 @@ CIRCLE
 8
 0
 10
-${this.centerX}
+${this.start.x}
 20
-${this.centerY}
+${this.start.y}
 40
 ${this.radius}`;
 	}
 
-	toCTX(ctx: CanvasRenderingContext2D) {
-		ctx.beginPath();
-		ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2);
-		ctx.strokeStyle = 'black';
-		ctx.stroke();
+	toCTX() {
+		this.ctx.beginPath();
+		this.ctx.arc(this.start.x, this.start.y, this.radius, 0, Math.PI * 2);
+		this.ctx.strokeStyle = 'black';
+		this.ctx.stroke();
 	}
-	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
-		this.centerX = left;
-		this.centerY = -this.centerY + up;
-		this.toCTX(ctx);
-	}
+
 }
 
 class Arc implements entity {
-	constructor(public centerX: number, public centerY: number, public radius: number, public startAngle: number, public endAngle: number, public id = ID(), public type = "arc") { }
+	id: string;
+	type: string;
+	ctx: CanvasRenderingContext2D;
 
+ 	constructor(public start: { x: number, y: number }, public radius: number, public angle: {start: number, end: number}, ctx: CanvasRenderingContext2D) {
+		this.id = ID();
+		this.type = "arc";
+		this.ctx = ctx;
+	}	
 	toDXF(): string {
 		return `
 0
@@ -109,101 +123,92 @@ ARC
 8
 0
 10
-${this.centerX}
+${this.start.x}
 20
-${this.centerY}
+${this.start.y}
 40
 ${this.radius}
 50
-${this.startAngle}
+${this.angle.start}
 51
-${this.endAngle}`;
+${this.angle.end}`;
 	}
 
-	toCTX(ctx: CanvasRenderingContext2D) {
-		ctx.beginPath();
-		ctx.arc(this.centerX, this.centerY, this.radius, this.startAngle, this.endAngle);
-		ctx.strokeStyle = 'black';
-		ctx.stroke();
+	toCTX() {
+		this.ctx.beginPath();
+		this.ctx.arc(this.start.x, this.start.y, this.radius, this.angle.start, this.angle.end);
+		this.ctx.strokeStyle = 'black';
+		this.ctx.stroke();
 	}
-	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
-		
-	}
+
 }
 
 class Rectangle implements entity {
-	constructor(public x: number, public y: number, public width: number, public height: number, public id = ID(), public type ="rectangle") { }
+	id: string;
+	type: string;
+	ctx: CanvasRenderingContext2D;
 
+	constructor(public start: { x: number, y: number }, public end: { x: number, y: number }, ctx: CanvasRenderingContext2D) {
+		this.id = ID();
+		this.type = "rectangle";
+		this.ctx = ctx;
+	}
 	toDXF(): string {
-		const x1 = this.x;
-		const y1 = this.y;
-		const x2 = this.x + this.width;
-		const y2 = this.y;
-		const x3 = this.x + this.width;
-		const y3 = this.y + this.height;
-		const x4 = this.x;
-		const y4 = this.y + this.height;
-
-		const line1 = new Line(x1, y1, x2, y2).toDXF();
-		const line2 = new Line(x2, y2, x3, y3).toDXF();
-		const line3 = new Line(x3, y3, x4, y4).toDXF();
-		const line4 = new Line(x4, y4, x1, y1).toDXF();
-
+		const line1 = new Line({ x: this.start.x, y: this.start.y }, { x: this.end.x, y: this.start.y }, this.ctx).toDXF();
+		const line2 = new Line({ x: this.end.x, y: this.start.y }, { x: this.end.x, y: this.end.y }, this.ctx).toDXF();
+		const line3 = new Line({ x: this.end.x, y: this.end.y }, { x: this.start.x, y: this.end.y }, this.ctx).toDXF();
+		const line4 = new Line({ x: this.start.x, y: this.end.y }, { x: this.start.x, y: this.start.y }, this.ctx).toDXF();
 		return line1 + line2 + line3 + line4;
 	}
 
-	toCTX(ctx: CanvasRenderingContext2D) {
-		ctx.beginPath();
-		ctx.rect(this.x, this.y, this.width, this.height);
-		ctx.strokeStyle = 'black';
-		ctx.stroke();
-	}
-
-	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
-		
+	toCTX() {
+		this.ctx.beginPath();
+		this.ctx.moveTo(this.start.x, this.start.y);
+		this.ctx.strokeStyle = 'black';
+		this.ctx.stroke();
 	}
 
 }
 
-class Polygon implements entity {
-	constructor(public points: Point[], public id = ID(), public type = "polygon") { }
+class Polygon {
+	id: string;
+	type: string;
+
+	constructor(public points: Point[], public ctx: CanvasRenderingContext2D) {
+		this.id = ID();
+		this.type = "polygon";
+		this.ctx = ctx;
+	}
 
 	toDXF(): string {
 		let dxfString = '';
 
 		for (let i = 0; i < this.points.length - 1; i++) {
-			const line = new Line(this.points[i].x, this.points[i].y, this.points[i + 1].x, this.points[i + 1].y).toDXF();
+			const line = new Line({ x: this.points[i].x, y: this.points[i].y }, { x: this.points[i + 1].x, y: this.points[i + 1].y }, this.ctx).toDXF();
 			dxfString += line;
 		}
 
 		// Close the polygon
-		const lastLine = new Line(
-			this.points[this.points.length - 1].x,
-			this.points[this.points.length - 1].y,
-			this.points[0].x,
-			this.points[0].y
-		).toDXF();
+		const lastLine = new Line({ x: this.points[this.points.length - 1].x, y: this.points[this.points.length - 1].y }, { x: this.points[0].x, y: this.points[0].y }, this.ctx).toDXF();
 		dxfString += lastLine;
 
 		return dxfString;
 	}
 
-	toCTX(ctx: CanvasRenderingContext2D) {
-		ctx.beginPath();
-		ctx.moveTo(this.points[0].x, this.points[0].y);
+	toCTX() {
+		this.ctx.beginPath();
+		this.ctx.moveTo(this.points[0].x, this.points[0].y);
 		for (let i = 1; i < this.points.length; i++) {
-			ctx.lineTo(this.points[i].x, this.points[i].y);
+			this.ctx.lineTo(this.points[i].x, this.points[i].y);
 		}
-		ctx.closePath();
-		ctx.strokeStyle = 'black';
-		ctx.stroke();
+		this.ctx.closePath();
+		this.ctx.strokeStyle = 'black';
+		this.ctx.stroke();
 	}
-	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
-		
-	}
+
 }
 
-class LinearPattern implements entity {
+class LinearPattern {
 	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public xOffset: number, public yOffset: number, public count: number, public id = ID(), public type = "linear") { }
 
 	toDXF(): string {
@@ -219,32 +224,29 @@ class LinearPattern implements entity {
 
 	private translateEntity(entity: Line | Circle | Arc | Rectangle | Point | Polygon, xOffset: number, yOffset: number): Line | Circle | Arc | Rectangle | Point | Polygon {
 		if (entity instanceof Line) {
-			return new Line(entity.x1 + xOffset, entity.y1 + yOffset, entity.x2 + xOffset, entity.y2 + yOffset);
+			return new Line({ x: entity.start.x + xOffset, y: entity.start.y + yOffset }, { x: entity.end.x + xOffset, y: entity.end.y + yOffset }, entity.ctx);
 		} else if (entity instanceof Circle) {
-			return new Circle(entity.centerX + xOffset, entity.centerY + yOffset, entity.radius);
+			return new Circle({ x: entity.start.x + xOffset, y: entity.start.y + yOffset }, entity.radius, entity.ctx);
 		} else if (entity instanceof Arc) {
-			return new Arc(entity.centerX + xOffset, entity.centerY + yOffset, entity.radius, entity.startAngle, entity.endAngle);
+			return new Arc({ x: entity.start.x + xOffset, y: entity.start.y + yOffset }, entity.radius, entity.angle, entity.ctx);
 		} else if (entity instanceof Rectangle) {
-			return new Rectangle(entity.x + xOffset, entity.y + yOffset, entity.width, entity.height);
+			return new Rectangle({ x: entity.start.x + xOffset, y: entity.start.y + yOffset }, { x: entity.end.x + xOffset, y: entity.end.y + yOffset }, entity.ctx);
 		} else if (entity instanceof Point) {
-			return new Point(entity.x + xOffset, entity.y + yOffset);
+			return new Point(entity.x + xOffset, entity.y + yOffset, entity.ctx);
 		} else if (entity instanceof Polygon) {
-			const translatedPoints = entity.points.map(point => new Point(point.x + xOffset, point.y + yOffset));
-			return new Polygon(translatedPoints);
+			const translatedPoints = entity.points.map(point => new Point(point.x + xOffset, point.y + yOffset, entity.ctx));
+			return new Polygon(translatedPoints, entity.ctx);
 		} else {
 			throw new Error('Unsupported entity type');
 		}
 	}
 
-	toCTX(ctx: CanvasRenderingContext2D) {
-		this.entities.forEach(entity => entity.toCTX(ctx));
-	}
-	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
-		
+	toCTX() {
+		this.entities.forEach(entity => entity.toCTX());
 	}
 }
 
-class CircularPattern implements entity {
+class CircularPattern {
 	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public centerX: number, public centerY: number, public count: number, public angleIncrement: number, public id = ID(), public type = "circular") { }
 
 	toDXF(): string {
@@ -265,48 +267,45 @@ class CircularPattern implements entity {
 		const sinAngle = Math.sin(radians);
 
 		if (entity instanceof Line) {
-			const x1 = centerX + (entity.x1 - centerX) * cosAngle - (entity.y1 - centerY) * sinAngle;
-			const y1 = centerY + (entity.x1 - centerX) * sinAngle + (entity.y1 - centerY) * cosAngle;
-			const x2 = centerX + (entity.x2 - centerX) * cosAngle - (entity.y2 - centerY) * sinAngle;
-			const y2 = centerY + (entity.x2 - centerX) * sinAngle + (entity.y2 - centerY) * cosAngle;
-			return new Line(x1, y1, x2, y2);
+			const x1 = centerX + (entity.start.x - centerX) * cosAngle - (entity.start.y - centerY) * sinAngle;
+			const y1 = centerY + (entity.start.x - centerX) * sinAngle + (entity.start.y - centerY) * cosAngle;
+			const x2 = centerX + (entity.end.x - centerX) * cosAngle - (entity.end.y - centerY) * sinAngle;
+			const y2 = centerY + (entity.end.x - centerX) * sinAngle + (entity.end.y - centerY) * cosAngle;
+			return new Line({ x: x1, y: y1 }, { x: x2, y: y2 }, entity.ctx);
 		} else if (entity instanceof Circle) {
-			const x = centerX + (entity.centerX - centerX) * cosAngle - (entity.centerY - centerY) * sinAngle;
-			const y = centerY + (entity.centerX - centerX) * sinAngle + (entity.centerY - centerY) * cosAngle;
-			return new Circle(x, y, entity.radius);
+			const x = centerX + (entity.start.x - centerX) * cosAngle - (entity.start.y - centerY) * sinAngle;
+			const y = centerY + (entity.start.x - centerX) * sinAngle + (entity.start.y - centerY) * cosAngle;
+			return new Circle({ x: x, y: y }, entity.radius, entity.ctx);
 		} else if (entity instanceof Arc) {
-			const x = centerX + (entity.centerX - centerX) * cosAngle - (entity.centerY - centerY) * sinAngle;
-			const y = centerY + (entity.centerX - centerX) * sinAngle + (entity.centerY - centerY) * cosAngle;
-			return new Arc(x, y, entity.radius, entity.startAngle, entity.endAngle);
+			const x = centerX + (entity.start.x - centerX) * cosAngle - (entity.start.y - centerY) * sinAngle;
+			const y = centerY + (entity.start.x - centerX) * sinAngle + (entity.start.y - centerY) * cosAngle;
+			return new Arc({ x: x, y: y }, entity.radius, entity.angle, entity.ctx);
 		} else if (entity instanceof Rectangle) {
-			const x = centerX + (entity.x - centerX) * cosAngle - (entity.y - centerY) * sinAngle;
-			const y = centerY + (entity.x - centerX) * sinAngle + (entity.y - centerY) * cosAngle;
-			return new Rectangle(x, y, entity.width, entity.height);
+			const x = centerX + (entity.start.x - centerX) * cosAngle - (entity.start.y - centerY) * sinAngle;
+			const y = centerY + (entity.start.x - centerX) * sinAngle + (entity.start.y - centerY) * cosAngle;
+			return new Rectangle({ x: x, y: y }, { x: entity.end.x, y: entity.end.y }, entity.ctx);
 		} else if (entity instanceof Point) {
 			const x = centerX + (entity.x - centerX) * cosAngle - (entity.y - centerY) * sinAngle;
 			const y = centerY + (entity.x - centerX) * sinAngle + (entity.y - centerY) * cosAngle;
-			return new Point(x, y);
+			return new Point(x, y, entity.ctx);
 		} else if (entity instanceof Polygon) {
 			const rotatedPoints = entity.points.map(point => {
 				const x = centerX + (point.x - centerX) * cosAngle - (point.y - centerY) * sinAngle;
 				const y = centerY + (point.x - centerX) * sinAngle + (point.y - centerY) * cosAngle;
-				return new Point(x, y);
+				return new Point(x, y, entity.ctx);
 			});
-			return new Polygon(rotatedPoints);
+			return new Polygon(rotatedPoints, entity.ctx);
 		} else {
 			throw new Error('Unsupported entity type');
 		}
 	}
 
-	toCTX(ctx: CanvasRenderingContext2D) {
-		this.entities.forEach(entity => entity.toCTX(ctx));
-	}
-	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
-		
+	toCTX() {
+		this.entities.forEach(entity => entity.toCTX());
 	}
 }
 
-class Mirror implements entity {
+class Mirror {
 	constructor(public entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], public mirrorAxis: 'x' | 'y', public mirrorPosition: number, public id = ID(), public type = "mirror") { }
 
 	toDXF(): string {
@@ -321,35 +320,63 @@ class Mirror implements entity {
 	private mirrorEntity(entity: Line | Circle | Arc | Rectangle | Point | Polygon, mirrorAxis: 'x' | 'y', mirrorPosition: number): Line | Circle | Arc | Rectangle | Point | Polygon {
 		if (mirrorAxis === 'x') {
 			if (entity instanceof Line) {
-				return new Line(entity.x1, 2 * mirrorPosition - entity.y1, entity.x2, 2 * mirrorPosition - entity.y2);
+				const x1 = entity.start.x;
+				const y1 = 2 * mirrorPosition - entity.start.y;
+				const x2 = entity.end.x;
+				const y2 = 2 * mirrorPosition - entity.end.y;
+				return new Line({ x: x1, y: y1 }, { x: x2, y: y2 }, entity.ctx);
 			} else if (entity instanceof Circle) {
-				return new Circle(entity.centerX, 2 * mirrorPosition - entity.centerY, entity.radius);
+				const x = entity.start.x;
+				const y = 2 * mirrorPosition - entity.start.y;
+				return new Circle({ x: x, y: y }, entity.radius, entity.ctx);
 			} else if (entity instanceof Arc) {
-				return new Arc(entity.centerX, 2 * mirrorPosition - entity.centerY, entity.radius, entity.startAngle, entity.endAngle);
+				const x = entity.start.x;
+				const y = 2 * mirrorPosition - entity.start.y;
+				return new Arc({ x: x, y: y }, entity.radius, entity.angle, entity.ctx);
 			} else if (entity instanceof Rectangle) {
-				return new Rectangle(entity.x, 2 * mirrorPosition - entity.y, entity.width, entity.height);
+				const x1 = entity.start.x;
+				const y1 = 2 * mirrorPosition - entity.start.y;
+				const x2 = entity.end.x;
+				const y2 = 2 * mirrorPosition - entity.end.y;
+				return new Rectangle({ x: x1, y: y1 }, { x: x2, y: y2 }, entity.ctx);
 			} else if (entity instanceof Point) {
-				return new Point(entity.x, 2 * mirrorPosition - entity.y);
+				const x = entity.x;
+				const y = 2 * mirrorPosition - entity.y;
+				return new Point(x, y, entity.ctx);
 			} else if (entity instanceof Polygon) {
-				const mirroredPoints = entity.points.map(point => new Point(point.x, 2 * mirrorPosition - point.y));
-				return new Polygon(mirroredPoints);
+				const mirroredPoints = entity.points.map(point => new Point(point.x, 2 * mirrorPosition - point.y, entity.ctx));
+				return new Polygon(mirroredPoints, entity.ctx);
 			} else {
 				throw new Error('Unsupported entity type');
 			}
 		} else if (mirrorAxis === 'y') {
 			if (entity instanceof Line) {
-				return new Line(2 * mirrorPosition - entity.x1, entity.y1, 2 * mirrorPosition - entity.x2, entity.y2);
+				const x1 = 2 * mirrorPosition - entity.start.x;
+				const y1 = entity.start.y;
+				const x2 = 2 * mirrorPosition - entity.end.x;
+				const y2 = entity.end.y;
+				return new Line({ x: x1, y: y1 }, { x: x2, y: y2 }, entity.ctx);
 			} else if (entity instanceof Circle) {
-				return new Circle(2 * mirrorPosition - entity.centerX, entity.centerY, entity.radius);
+				const x = 2 * mirrorPosition - entity.start.x;
+				const y = entity.start.y;
+				return new Circle({ x: x, y: y }, entity.radius, entity.ctx);
 			} else if (entity instanceof Arc) {
-				return new Arc(2 * mirrorPosition - entity.centerX, entity.centerY, entity.radius, entity.startAngle, entity.endAngle);
+				const x = 2 * mirrorPosition - entity.start.x;
+				const y = entity.start.y;
+				return new Arc({ x: x, y: y }, entity.radius, entity.angle, entity.ctx);
 			} else if (entity instanceof Rectangle) {
-				return new Rectangle(2 * mirrorPosition - entity.x, entity.y, entity.width, entity.height);
+				const x1 = 2 * mirrorPosition - entity.start.x;
+				const y1 = entity.start.y;
+				const x2 = 2 * mirrorPosition - entity.end.x;
+				const y2 = entity.end.y;
+				return new Rectangle({ x: x1, y: y1 }, { x: x2, y: y2 }, entity.ctx);
 			} else if (entity instanceof Point) {
-				return new Point(2 * mirrorPosition - entity.x, entity.y);
+				const x = 2 * mirrorPosition - entity.x;
+				const y = entity.y;
+				return new Point(x, y, entity.ctx);
 			} else if (entity instanceof Polygon) {
-				const mirroredPoints = entity.points.map(point => new Point(2 * mirrorPosition - point.x, point.y));
-				return new Polygon(mirroredPoints);
+				const mirroredPoints = entity.points.map(point => new Point(2 * mirrorPosition - point.x, point.y, entity.ctx));
+				return new Polygon(mirroredPoints, entity.ctx);
 			} else {
 				throw new Error('Unsupported entity type');
 			}
@@ -358,11 +385,8 @@ class Mirror implements entity {
 		}
 	}
 
-	toCTX(ctx: CanvasRenderingContext2D) {
-		this.entities.forEach(entity => entity.toCTX(ctx));
-	}
-	rerender(left: number, up: number, ctx: CanvasRenderingContext2D): void {
-		
+	toCTX() {
+		this.entities.forEach(entity => entity.toCTX());
 	}
 }
 
@@ -411,108 +435,99 @@ EOF`;
 		return dxfString;
 	}
 
-	toCTX(ctx: CanvasRenderingContext2D) {
-		this.entities.forEach(entity => entity.toCTX(ctx));
+	toCTX() {
+		this.entities.forEach(entity => entity.toCTX());
 	}
 }
 
 class DXF_MAKER {
-	private static DXFDocument: DXFDocument;
-	private static Shapes: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[];
+	private  DXFDocument: DXFDocument;
+	private  Shapes: (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[];
 	constructor() {
-		let that = DXF_MAKER;
-		that.DXFDocument = new DXFDocument()
-		that.Shapes = [];
+		this.DXFDocument = new DXFDocument();
+		this.Shapes = [];
 	}
 
-	static addShape(shape: Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror): void {
-		let that = DXF_MAKER;
-		that.Shapes.push(shape);
-		that.bindShapesWithDocument();
+	 addShape(shape: Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror): void {
+		this.Shapes.push(shape);
+		this.bindShapesWithDocument();
 	}
 
-	static getShapes(): (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[] {
-		let that = DXF_MAKER;
-		return that.Shapes;
+	 getShapes(): (Line | Circle | Arc | Rectangle | Point | Polygon | LinearPattern | CircularPattern | Mirror)[] {
+		return this.Shapes;
 	}
 
-	static deleteShape(id: string): void {
-		let that = DXF_MAKER;
-		that.Shapes = that.Shapes.filter(shape => shape.id !== id);
+	 deleteShape(id: string): void {
+		this.Shapes = this.Shapes.filter(shape => shape.id !== id);
 	}
 
 
-	private static bindShapesWithDocument(): void {
-		let that = DXF_MAKER;
-		that.DXFDocument = new DXFDocument();
-		that.Shapes.forEach(shape => that.DXFDocument.addShape(shape));
+	private  bindShapesWithDocument(): void {
+		this.DXFDocument = new DXFDocument();
+		this.Shapes.forEach(shape => this.DXFDocument.addShape(shape));
 	}
 
-	static clearShapes(): void {
-		let that = DXF_MAKER;
-		that.DXFDocument = new DXFDocument();
-		that.Shapes = [];
+	 clearShapes(): void {
+		this.DXFDocument = new DXFDocument();
+		this.Shapes = [];
 	}
 
 	// shapes adder
-	static addLine(x1: number, y1: number, x2: number, y2: number): void {
-		let that = DXF_MAKER;
-		that.DXFDocument.addShape(new Line(x1, y1, x2, y2));
+	 addPoint(x: number, y: number, ctx: CanvasRenderingContext2D): void {
+		this.addShape(new Point(x, y, ctx));
 	}
 
-	static addCircle(centerX: number, centerY: number, radius: number): void {
-		let that = DXF_MAKER;
-		that.DXFDocument.addShape(new Circle(centerX, centerY, radius));
+	 addLine(start: { x: number, y: number }, end: { x: number, y: number }, ctx: CanvasRenderingContext2D): void {
+		this.addShape(new Line(start, end, ctx));
 	}
 
-	static addArc(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number): void {
-		let that = DXF_MAKER;
-		that.DXFDocument.addShape(new Arc(centerX, centerY, radius, startAngle, endAngle));
+	 addCircle(start: { x: number, y: number }, radius: number, ctx: CanvasRenderingContext2D): void {
+		this.addShape(new Circle(start, radius, ctx));
 	}
 
-	static addRectangle(x: number, y: number, width: number, height: number): void {
-		let that = DXF_MAKER;
-		that.DXFDocument.addShape(new Rectangle(x, y, width, height));
+	 addArc(start: { x: number, y: number }, radius: number, angle: {start: number, end: number}, ctx: CanvasRenderingContext2D): void {
+		this.addShape(new Arc(start, radius, angle, ctx));
 	}
 
-	static addPoint(x: number, y: number): void {
-		let that = DXF_MAKER;
-		that.DXFDocument.addShape(new Point(x, y));
+	 addRectangle(start: { x: number, y: number }, end: { x: number, y: number }, ctx: CanvasRenderingContext2D): void {
+		this.addShape(new Rectangle(start, end, ctx));
 	}
 
-	static addPolygon(points: Point[]): void {
-		let that = DXF_MAKER;
-		that.DXFDocument.addShape(new Polygon(points));
+	 addPolygon(points: Point[], ctx: CanvasRenderingContext2D): void {
+		this.addShape(new Polygon(points, ctx));
 	}
 
-	// patterns adder
-	static addLinearPattern(entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], xOffset: number, yOffset: number, count: number): void {
-		let that = DXF_MAKER;
-		that.DXFDocument.addShape(new LinearPattern(entities, xOffset, yOffset, count));
+	 addLinearPattern(entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], xOffset: number, yOffset: number, count: number): void {
+		this.addShape(new LinearPattern(entities, xOffset, yOffset, count));
 	}
 
-	static addCircularPattern(entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], centerX: number, centerY: number, count: number, angleIncrement: number): void {
-		let that = DXF_MAKER;
-		that.DXFDocument.addShape(new CircularPattern(entities, centerX, centerY, count, angleIncrement));
+	 addCircularPattern(entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], centerX: number, centerY: number, count: number, angleIncrement: number): void {
+		this.addShape(new CircularPattern(entities, centerX, centerY, count, angleIncrement));
 	}
 
-	// mirror adder
-	static addMirror(entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], mirrorAxis: 'x' | 'y', mirrorPosition: number): void {
-		let that = DXF_MAKER;
-		that.DXFDocument.addShape(new Mirror(entities, mirrorAxis, mirrorPosition));
+	 addMirror(entities: (Line | Circle | Arc | Rectangle | Point | Polygon)[], mirrorAxis: 'x' | 'y', mirrorPosition: number): void {
+		this.addShape(new Mirror(entities, mirrorAxis, mirrorPosition));
 	}
 
 	// generate dxf
-	static generateDXF(): string {
-		let that = DXF_MAKER;
-		return that.DXFDocument.generateDXF();
+	 generateDXF(): string {
+		return this.DXFDocument.generateDXF();
 	}
 
-	static toCTX(ctx: CanvasRenderingContext2D) {
-		this.Shapes.forEach(shape => shape.toCTX(ctx));
+	 toCTX() {
+		this.Shapes.forEach(shape => shape.toCTX());
 	}
+	// even listener and animation
+	 addEventListener(canvas: HTMLCanvasElement) {
+		canvas.addEventListener('click', (e: MouseEvent) => {
+			const x = e.clientX - canvas.getBoundingClientRect().left;
+			const y = e.clientY - canvas.getBoundingClientRect().top;
+			let ctx = canvas.getContext('2d');
+			this.addPoint(x, y, ctx? ctx : new CanvasRenderingContext2D());
+		});
+	}
+
+
 }
 
 export default DXF_MAKER;
-
-export { entity, Point, Line, Circle, Arc, Rectangle, Polygon, LinearPattern, CircularPattern, Mirror, DXFDocument };
