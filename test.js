@@ -3,3 +3,4 @@ for (let zoomLevel = 1; zoomLevel <= 100; zoomLevel++) {
     console.log(`Zoom Level: ${zoomLevel}, Scale: ${scale}`);
   }
   
+  
