@@ -16,7 +16,7 @@ const config = {
 			out: 'build',
 			preprocess: false,
 			envPrefix: ''
-		})
+		}),
 	}
 };
 export default config;
